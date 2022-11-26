@@ -1,2 +1,2 @@
 pytest==7.2.0
-#java-stream==1.5.1
+java-stream==1.5.1

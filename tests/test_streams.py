@@ -60,6 +60,14 @@ def create_list():
     return data
 
 
+def create_numeric_list():
+    return [1, 3, 5, 6, 2]
+
+
+def create_string_list():
+    return ["X", "Y", "A"]
+
+
 def create_dict():
     parent_a, parent_b = create_parents()
     return {
@@ -119,11 +127,11 @@ def test_list_peak():
     def extend_name(x: Node):
         x.name += " Extended"
 
-    assert stream.peak(extend_name).one().name.endswith("Extended")
+    assert stream.peek(extend_name).one().name.endswith("Extended")
 
 
 def test_dict_one():
-    stream = Stream.ofDict(create_dict())
+    stream = Stream.of_dict(create_dict())
 
     for item in stream.each():
         assert isinstance(item[0], str)
@@ -138,3 +146,38 @@ def test_generator_one():
     assert stream.one() == 5
     assert stream.one() == 8
     assert stream.one() == 13
+
+
+def test_numeric_list_min():
+    stream = Stream.of(create_numeric_list())
+    assert stream.min() == 1
+
+
+def test_numeric_list_max():
+    stream = Stream.of(create_numeric_list())
+    assert stream.max() == 6
+
+
+def test_numeric_list_sum():
+    stream = Stream.of(create_numeric_list())
+    assert stream.sum() == 17
+
+
+def test_numeric_list_limit():
+    stream = Stream.of(create_numeric_list())
+    assert stream.limit(2).sum() == 4
+
+
+def test_string_list_min():
+    stream = Stream.of(create_string_list())
+    assert stream.min() == "A"
+
+
+def test_string_list_max():
+    stream = Stream.of(create_string_list())
+    assert stream.max() == "Y"
+
+
+def test_string_list_sum():
+    stream = Stream.of(create_string_list())
+    assert stream.sum() == "XYA"

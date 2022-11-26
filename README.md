@@ -1,7 +1,5 @@
 # python-streams
-The goal is to provide a lightweight Java-like Streams API for Python, based on the Generator patten.
-
-I don't know why no such library exists.
+The goal is to provide a lightweight Streams API for Python, based on the Generator patten.
 
 Comparison
 
