@@ -7,7 +7,7 @@ from src.streams import Stream
 def fibonacci():
     a = 1
     b = 1
-    for i in range(6):
+    while True:
         yield b
         a, b = b, a + b
 
@@ -154,7 +154,7 @@ def test_generator_one():
     assert stream.next() == 8
     assert stream.next() == 13
 
-    #assert stream.map(lambda x: x - 10).next() == 23
+    assert stream.map(lambda x: x - 10).next() == 11
 
 def test_numeric_list_min():
     stream = Stream.of(create_numeric_list())

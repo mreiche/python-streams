@@ -25,14 +25,16 @@ class Stream:
 class IterableStream(Generic[T]):
 
     def __normalize_iterator(self, iterable: Iterable[T]):
-        if isinstance(iterable, Iterator):
-            return iterable
-        elif isinstance(iterable, list):
+        #if isinstance(iterable, Iterator):
+
+        if isinstance(iterable, list):
             return iter(iterable)
         elif isinstance(iterable, dict):
             return iter(iterable.items())
         elif isinstance(iterable, str):
             return iter(iterable)
+        else:
+            return iterable
 
     def __init__(self, iterable: Iterable[T]):
         self.__iterable = self.__normalize_iterator(iterable)
