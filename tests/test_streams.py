@@ -3,12 +3,13 @@ from typing import List
 
 from src.streams import Stream
 
+
 def fibonacci():
-    a=1
-    b=1
+    a = 1
+    b = 1
     for i in range(6):
         yield b
-        a,b= b,a+b
+        a, b = b, a + b
 
 
 @dataclass
@@ -26,7 +27,7 @@ def flat_map_children(parent: Node):
     return parent.children
 
 
-def compare_name(x:Node, y:Node):
+def compare_name(x: Node, y: Node):
     if x.name < y.name:
         return -1
     elif x.name > y.name:
@@ -80,7 +81,7 @@ def test_list_one():
     data = create_list()
     stream = Stream.of(data)
 
-    assert stream.one().name == "Parent A"
+    assert stream.next().name == "Parent A"
 
 
 def test_list_map():
@@ -90,15 +91,21 @@ def test_list_map():
         assert name.startswith("Parent")
 
 
+def test_list_map_type():
+    parent_a, parent_b = create_parents()
+    stream = Stream.of(parent_b.children)
+    assert stream.map(lambda x: x.parent, Node).next().name == "Parent B"
+
+
 def test_string_one():
     stream = Stream.of("Hallo Welt", str)
-    assert stream.one() == "H"
+    assert stream.next() == "H"
 
 
 def test_string_one_ends():
     stream = Stream.of("H", str)
-    assert stream.one() == "H"
-    assert stream.one() is None
+    assert stream.next() == "H"
+    assert stream.next() is None
 
 
 def test_list_flatmap_count():
@@ -113,12 +120,12 @@ def test_list_filter_count():
 
 def test_list_sort():
     stream = Stream.of(create_list())
-    assert stream.sort(compare_name, reverse=True).one().name.endswith("B")
+    assert stream.sort(compare_name, reverse=True).next().name.endswith("B")
 
 
 def test_list_reverse():
     stream = Stream.of(create_list())
-    assert stream.reverse().one().name.endswith("B")
+    assert stream.reverse().next().name.endswith("B")
 
 
 def test_list_peak():
@@ -127,10 +134,10 @@ def test_list_peak():
     def extend_name(x: Node):
         x.name += " Extended"
 
-    assert stream.peek(extend_name).one().name.endswith("Extended")
+    assert stream.peek(extend_name).next().name.endswith("Extended")
 
 
-def test_dict_one():
+def test_stream_dict():
     stream = Stream.of_dict(create_dict())
 
     for item in stream.each():
@@ -140,13 +147,14 @@ def test_dict_one():
 
 def test_generator_one():
     stream = Stream.of(fibonacci())
-    assert stream.one() == 1
-    assert stream.one() == 2
-    assert stream.one() == 3
-    assert stream.one() == 5
-    assert stream.one() == 8
-    assert stream.one() == 13
+    assert stream.next() == 1
+    assert stream.next() == 2
+    assert stream.next() == 3
+    assert stream.next() == 5
+    assert stream.next() == 8
+    assert stream.next() == 13
 
+    #assert stream.map(lambda x: x - 10).next() == 23
 
 def test_numeric_list_min():
     stream = Stream.of(create_numeric_list())
@@ -180,4 +188,34 @@ def test_string_list_max():
 
 def test_string_list_sum():
     stream = Stream.of(create_string_list())
-    assert stream.sum() == "XYA"
+    assert stream.map(str.lower).sum() == "xya"
+
+
+def test_numeric_list_concat():
+    stream = Stream.of(create_numeric_list())
+    assert stream.concat(create_numeric_list()).sum() == 34
+
+
+def test_of_many_numeric_list():
+    stream = Stream.of_many(
+        int,
+        create_numeric_list(),
+        create_numeric_list(),
+        create_numeric_list()
+        )
+    assert stream.sum() == 51
+
+
+def test_doc():
+    stream = Stream.of([1, 2, 3, 4, 5])
+
+    sum = stream \
+        .map(lambda x: x + 1) \
+        .filter(lambda x: x > 2) \
+        .sorted(int, reverse=True) \
+        .reverse() \
+        .limit(2) \
+        .concat([4]) \
+        .sum()
+
+    assert sum == 11

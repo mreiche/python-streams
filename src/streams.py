@@ -1,5 +1,6 @@
-import functools, itertools
-from typing import Iterable, Generic, TypeVar, Callable, ClassVar, List, Iterator, Dict, Tuple
+import functools
+import itertools
+from typing import Iterable, Generic, TypeVar, Callable, List, Iterator, Dict, Tuple
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -14,11 +15,11 @@ class Stream:
 
     @staticmethod
     def of_dict(source_dict: Dict[K, T]):
-        return IterableStream[Tuple[K,T]](source_dict)
+        return IterableStream[Tuple[K, T]](source_dict)
 
     @staticmethod
     def of_many(typehint: T = None, *iterables):
-        return IterableStream[T]([]).concat(iterables)
+        return IterableStream[T]([]).concat(*iterables)
 
 
 class IterableStream(Generic[T]):
@@ -33,11 +34,9 @@ class IterableStream(Generic[T]):
         elif isinstance(iterable, str):
             return iter(iterable)
 
-
     def __init__(self, iterable: Iterable[T]):
         self.__iterable = self.__normalize_iterator(iterable)
         self.__collected: List[T] = None
-
 
     def map(self, cb: Callable[[T], R], typehint: R = None):
         return IterableStream[R](map(cb, self.__iterable))
@@ -63,10 +62,14 @@ class IterableStream(Generic[T]):
         sort = sorted(self.__iterable, key=key, reverse=reverse)
         return IterableStream[T](sort)
 
+    def sorted(self, key, reverse: bool = False):
+        sort = sorted(self.__iterable, key=key, reverse=reverse)
+        return IterableStream[T](sort)
+
     def each(self) -> Iterable[T]:
         return self.__iterable
 
-    def one(self) -> T|None:
+    def next(self) -> T | None:
         try:
             return next(self.__iterable)
         except StopIteration as e:
@@ -99,13 +102,13 @@ class IterableStream(Generic[T]):
 
     def limit(self, limit: int):
         def __limit():
-           for i in range(limit):
-               yield self.one()
+            for i in range(limit):
+                yield self.next()
 
         return IterableStream[T](__limit())
 
     def concat(self, *iterables):
-        iterators = []
+        iterators = [self.__iterable]
         for iterator in iterables:
             iterators.append(self.__normalize_iterator(iterator))
 
