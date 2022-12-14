@@ -256,3 +256,13 @@ def test_dict_list_filter_key():
 def test_dict_list_map_key():
     stream = Stream.of(create_dict_list())
     assert stream.map_key("name").join(":") == "Parent A:Parent B"
+
+
+def test_dict_map_key():
+    stream = Stream.of_dict(create_dict())
+    assert stream.map_key(0).next() == "parent_a"
+
+
+def test_dict_map_value():
+    stream = Stream.of_dict(create_dict())
+    assert stream.map_key(1, Node).next().name == "Parent A"

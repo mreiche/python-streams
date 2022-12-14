@@ -60,7 +60,7 @@ parent = Node(name="B")
 child = Node(name="A", parent=parent)
 
 stream = Stream.of([child])
-assert stream.map(lambda x: x.parent, Node).next().name == "B"
+assert stream.map(lambda x: x.parent, typehint=Node).next().name == "B"
 ```
 
 This is not necessary when you pass a mapping function:
@@ -95,12 +95,12 @@ all_names = Stream.of([child]).map_key("name").join(", ")
 
 ### Stream dictionaries
 
-Dictionaries are streamed as `tuples(key, value)`
+Dictionaries are streamed as `tuple(key, value)`
 
 ```python
 children = {"a": child} 
 stream = Stream.of_dict(children)
-keys = stream.map(lambda tuple: tuple[0])
+values = stream.map_key(1, typehint=Node)
 ```
 
 ## Comparison with other libraries

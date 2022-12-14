@@ -43,7 +43,7 @@ class IterableStream(Generic[T]):
     def map(self, cb: Callable[[T], R], typehint: R = None):
         return IterableStream[R](map(cb, self.__iterable))
 
-    def map_key(self, key: str, typehint: R = None) -> "IterableStream[R]":
+    def map_key(self, key: str | int, typehint: R = None) -> "IterableStream[R]":
         def __map_key(x):
             if isinstance(x, (list, dict, tuple)):
                 return x[key]
@@ -55,9 +55,15 @@ class IterableStream(Generic[T]):
     def filter(self, cb: Callable[[T, T], bool]):
         return IterableStream[T](filter(cb, self.__iterable))
 
-    def filter_key(self, key: str, invert: bool = False):
+    def filter_key(self, key: str | int, invert: bool = False):
         def __filter_key(x):
-            if isinstance(x, (list, dict, tuple)):
+            if isinstance(x, (list, tuple)):
+                size = len(x)
+                if invert:
+                    return key >= size
+                else:
+                    return key < size
+            elif isinstance(x, (dict, Iterable)):
                 if invert:
                     return key not in x
                 else:
