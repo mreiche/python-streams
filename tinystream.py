@@ -43,14 +43,45 @@ class IterableStream(Generic[T]):
     def map(self, cb: Callable[[T], R], typehint: R = None):
         return IterableStream[R](map(cb, self.__iterable))
 
+    def map_key(self, key: str, typehint: R = None) -> "IterableStream[R]":
+        def __map_key(x):
+            if isinstance(x, (list, dict, tuple)):
+                return x[key]
+            else:
+                return getattr(x, key)
+
+        return self.filter_key(key).map(__map_key, R)
+
     def filter(self, cb: Callable[[T, T], bool]):
         return IterableStream[T](filter(cb, self.__iterable))
 
-    def flatmap(self, cb: Callable[[T], Iterable[R]], typehint: R = None):
+    def filter_key(self, key: str, invert: bool = False):
+        def __filter_key(x):
+            if isinstance(x, (list, dict, tuple)):
+                if invert:
+                    return key not in x
+                else:
+                    return key in x
+            else:
+                if invert:
+                    return not hasattr(x, key)
+                else:
+                    return hasattr(x, key)
+
+        return self.filter(__filter_key)
+
+    def flatmap(self, cb: Callable[[T], Iterable[R]] = None, typehint: R = None):
+
         def __flatmap(f, xs):
             return (y for ys in xs for y in f(ys))
 
-        return IterableStream[R](__flatmap(cb, self.__iterable))
+        def __flatten(xs):
+            return (y for ys in xs for y in ys)
+
+        if cb is not None:
+            return IterableStream[R](__flatmap(cb, self.__iterable))
+        else:
+            return IterableStream[R](__flatten(self.__iterable))
 
     def peek(self, cb: Callable[[T], None]):
         def __peek(x: T):
@@ -78,11 +109,17 @@ class IterableStream(Generic[T]):
             return None
 
     def collect(self):
+        """Collects all items to a list and ends the stream"""
         if not self.__collected:
             self.__collected = list(self.__iterable)
         return self.__collected
 
+    def join(self, separator: str) -> str:
+        """Joins the string to the elements and ends the stream"""
+        return separator.join(map(str, self.__iterable))
+
     def count(self):
+        """Collects and counts all items and ends the stream"""
         return len(self.collect())
 
     def reverse(self):
@@ -94,6 +131,7 @@ class IterableStream(Generic[T]):
         return functools.reduce(cb, self.__iterable)
 
     def sum(self) -> T:
+        """Sums all numbers and ends the stream"""
         return self.reduce(lambda x, y: x + y)
 
     def max(self) -> T:

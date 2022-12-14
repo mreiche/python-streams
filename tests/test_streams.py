@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from src.streams import Stream
+from tinystream import Stream
 
 
 def fibonacci():
@@ -75,6 +75,11 @@ def create_dict():
         "parent_a": parent_a,
         "parent_b": parent_b
     }
+
+
+def create_dict_list():
+    parent_a, parent_b = create_parents()
+    return [parent_a.__dict__, parent_b.__dict__]
 
 
 def test_list_one():
@@ -156,6 +161,7 @@ def test_generator_one():
 
     assert stream.map(lambda x: x - 10).next() == 11
 
+
 def test_numeric_list_min():
     stream = Stream.of(create_numeric_list())
     assert stream.min() == 1
@@ -219,3 +225,34 @@ def test_doc():
         .sum()
 
     assert sum == 11
+
+
+def test_flatmap_list_of_list():
+    stream = Stream.of([create_numeric_list(), create_numeric_list(), create_numeric_list()])
+    flat = stream.flatmap()
+    assert flat.count() == 15
+
+
+def test_collect_joining():
+    stream = Stream.of(create_numeric_list())
+    assert stream.join(" -> ") == "1 -> 3 -> 5 -> 6 -> 2"
+
+
+def test_object_list_filter_key():
+    stream = Stream.of(create_list())
+    assert stream.filter_key("name").count() == 2
+
+
+def test_object_list_map_key():
+    stream = Stream.of(create_list())
+    assert stream.map_key("name").join(":") == "Parent A:Parent B"
+
+
+def test_dict_list_filter_key():
+    stream = Stream.of(create_dict_list())
+    assert stream.filter_key("name", invert=True).count() == 0
+
+
+def test_dict_list_map_key():
+    stream = Stream.of(create_dict_list())
+    assert stream.map_key("name").join(":") == "Parent A:Parent B"
