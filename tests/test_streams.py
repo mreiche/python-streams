@@ -4,7 +4,7 @@ from typing import List
 from tinystream import Stream
 
 
-def fibonacci():
+def fibonacci(*kwargs):
     a = 1
     b = 1
     while True:
@@ -150,8 +150,7 @@ def test_stream_dict():
         assert isinstance(item[1], Node)
 
 
-def test_generator_one():
-    stream = Stream.of(fibonacci())
+def assert_fibonacci(stream: Stream):
     assert stream.next() == 1
     assert stream.next() == 2
     assert stream.next() == 3
@@ -160,6 +159,11 @@ def test_generator_one():
     assert stream.next() == 13
 
     assert stream.map(lambda x: x - 10).next() == 11
+
+
+def test_generator_one():
+    stream = Stream.of(fibonacci())
+    assert_fibonacci(stream)
 
 
 def test_numeric_list_min():
@@ -231,6 +235,13 @@ def test_flatmap_list_of_list():
     stream = Stream.of([create_numeric_list(), create_numeric_list(), create_numeric_list()])
     flat = stream.flatmap()
     assert flat.count() == 15
+
+
+def test_flatmap_generator():
+    stream = Stream.of(create_numeric_list())\
+        .flatmap(fibonacci)\
+
+    assert_fibonacci(stream)
 
 
 def test_collect_joining():
