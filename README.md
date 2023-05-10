@@ -15,7 +15,7 @@ from tinystream import Stream
 stream = Stream.of([1, 2, 3, 4, 5]) # of_many(*), of_dict()
 
 stream \
-    .map(lambda x: x + 1) \       # flatmap(), each(), next(), peek(), map_key()
+    .map(lambda x: x + 1) \       # flatmap(), peek(), map_key()
     .filter(lambda x: x > 2) \    # filter_key()
     .sorted(int, reverse=True) \  # sort()
     .reverse() \                  # collect(), count()
@@ -62,7 +62,7 @@ parent = Node(name="B")
 child = Node(name="A", parent=parent)
 
 stream = Stream.of([child])
-assert stream.map(lambda x: x.parent, typehint=Node).next().name == "B"
+assert next(stream.map(lambda x: x.parent, typehint=Node)).name == "B"
 ```
 
 This is not necessary when you pass a mapping function:
@@ -70,7 +70,7 @@ This is not necessary when you pass a mapping function:
 def map_parent(n: Node):
     return n.parent
 
-assert stream.map(map_parent).next().name == "B"
+assert next(stream.map(map_parent)).name == "B"
 ```
 
 ## Retrieve optional
