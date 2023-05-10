@@ -1,6 +1,7 @@
 import functools
 import itertools
-from typing import Iterable, Generic, TypeVar, Callable, List, Iterator, Dict, Tuple
+from typing import Iterable, Generic, TypeVar, Callable, List, Dict, Tuple
+from optional import Optional
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -24,7 +25,7 @@ class Stream:
 
 class IterableStream(Generic[T]):
 
-    def __normalize_iterator(self, iterable: Iterable[T]):
+    def __normalize_iterator(self, iterable: Iterable[T]) -> Iterable[T]:
         #if isinstance(iterable, Iterator):
 
         if isinstance(iterable, list):
@@ -51,6 +52,22 @@ class IterableStream(Generic[T]):
                 return getattr(x, key)
 
         return self.filter_key(key).map(__map_key, R)
+
+    def map_keys(self, keys: Iterable[str], typehint: R = None) -> "IterableStream[R]":
+        def _map_keys():
+            for val in self.__iterable:
+                for key in keys:
+                    if isinstance(val, (list, dict, tuple)) and key in val:
+                        val = val[key]
+                    elif hasattr(val, key):
+                        val = getattr(val, key)
+                    else:
+                        val = None
+                        break
+                if val:
+                    yield val
+
+        return IterableStream[R](_map_keys())
 
     def filter(self, cb: Callable[[T, T], bool]):
         return IterableStream[T](filter(cb, self.__iterable))
@@ -113,6 +130,10 @@ class IterableStream(Generic[T]):
             return next(self.__iterable)
         except StopIteration as e:
             return None
+
+    @property
+    def first(self):
+        return Optional.of(self.next())
 
     def collect(self):
         """Collects all items to a list and ends the stream"""

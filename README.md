@@ -1,3 +1,6 @@
+![Tests Status](https://github.com/mreiche/python-streams/actions/workflows/tests.yml/badge.svg)
+[![Code Coverage Status](https://codecov.io/github/mreiche/python-streams/branch/main/graph/badge.svg)](https://app.codecov.io/github/mreiche/python-automation-framework)
+
 # tinystream / python-streams
 
 This is a simple and lightweight Streams API inspired by Java Streams with support for type hinting.
@@ -18,8 +21,9 @@ stream \
     .reverse() \                  # collect(), count()
     .limit(2) \
     .concat([4]) \
-    .sum()                        # reduce(), max(), min()
+    .sum()                        # first, reduce(), max(), min()
 ```
+
 ## Typehinting
 
 Since Python does not support typed lambdas, this library implements a workaround.
@@ -54,8 +58,6 @@ class Node:
 for lambdas:
 
 ```python
-from tinystream import Stream
-
 parent = Node(name="B")
 child = Node(name="A", parent=parent)
 
@@ -71,20 +73,39 @@ def map_parent(n: Node):
 assert stream.map(map_parent).next().name == "B"
 ```
 
+## Retrieve optional
+
+The `first` property returns a [optional.py:Optional](https://pypi.org/project/optional.py/) 
+
+```python
+stream.first.is_present()
+```
+
 ## End of stream
 
 Calling methods like `sum()`, `collect()`, `count()`... will end the stream.
 
 ## More features
 
-### Filter by key existing
+### Filter by existing key
 ```python
 items_with_name = Stream.of([child]).filter_key("name")
 ```
 
-### Map name
+### Map object name attribute
 ```python
 names = Stream.of([child]).map_key("name")
+```
+
+### Deep mapping of name attributes
+```python
+list = [
+   {"node": Node(name="Node A")},
+   {"node": Node(name="Node B")},
+   {"node": Node(name="Node C")},
+   {"node": Node(name="Node D")},
+]
+Stream.of(list).map_keys(("node", "name"))
 ```
 
 ### Collected join
@@ -118,7 +139,7 @@ There are a couple of other implementation to fulfill similar requirements.
 ## Run the tests
 
 ```shell
-PYTHONPATH="." pytest --cov=tinystream tests/
+PYTHONPATH="." pytest --cov=tinystream -n 4 tests/
 ```
 
 ### Release update
