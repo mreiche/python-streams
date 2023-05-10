@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from tinystream import Stream
+from tinystream import Stream, IterableStream
 
 
 def fibonacci(*kwargs):
@@ -77,6 +77,15 @@ def create_dict():
     }
 
 
+def create_node_dict_list():
+    return [
+        {"node": Node(name="Node A")},
+        {"node": Node(name="Node B")},
+        {"node": Node(name="Node C")},
+        {"node": Node(name="Node D")},
+    ]
+
+
 def create_dict_list():
     parent_a, parent_b = create_parents()
     return [parent_a.__dict__, parent_b.__dict__]
@@ -150,7 +159,7 @@ def test_stream_dict():
         assert isinstance(item[1], Node)
 
 
-def assert_fibonacci(stream: Stream):
+def assert_fibonacci(stream: IterableStream):
     assert stream.next() == 1
     assert stream.next() == 2
     assert stream.next() == 3
@@ -254,12 +263,28 @@ def test_object_list_filter_key():
     assert stream.filter_key("name").count() == 2
 
 
+def test_object_list_filter_key_invert():
+    stream = Stream.of(create_list())
+    assert stream.filter_key("name", invert=True).count() == 0
+
+
 def test_object_list_map_key():
     stream = Stream.of(create_list())
     assert stream.map_key("name").join(":") == "Parent A:Parent B"
 
 
+def test_object_dict_map_key():
+    stream = Stream.of(create_node_dict_list())
+    assert stream.map_keys(("node", "name"), str).filter(lambda name: name.endswith("C")).first.get() == "Node C"
+    assert stream.map_keys(("node", "inexistent"), str).first.is_empty()
+
+
 def test_dict_list_filter_key():
+    stream = Stream.of(create_dict_list())
+    assert stream.filter_key("name").count() == 2
+
+
+def test_dict_list_filter_key_invert():
     stream = Stream.of(create_dict_list())
     assert stream.filter_key("name", invert=True).count() == 0
 
@@ -272,6 +297,11 @@ def test_dict_list_map_key():
 def test_dict_map_key():
     stream = Stream.of_dict(create_dict())
     assert stream.map_key(0).next() == "parent_a"
+
+
+def test_dict_filter_key_invert():
+    stream = Stream.of_dict(create_dict())
+    assert stream.filter_key(0, invert=True).next() is None
 
 
 def test_dict_map_value():

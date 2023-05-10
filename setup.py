@@ -14,5 +14,5 @@ setup(
     url="https://github.com/mreiche/python-streams",
     author="Mike Reiche",
     py_modules=['tinystream'],
-    install_requires=[],
+    install_requires=["optional.py>=1.3.2"],
 )
