@@ -1,6 +1,8 @@
 import functools
 import itertools
-from typing import Iterable, Generic, TypeVar, Callable, List, Dict, Tuple
+import logging
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator
+import warnings
 from optional import Optional
 
 T = TypeVar("T")
@@ -23,7 +25,17 @@ class Stream:
         return IterableStream[T]([]).concat(*iterables)
 
 
-class IterableStream(Generic[T]):
+
+class IterableStream(Iterator[T]):
+
+    def __next__(self) -> T|None:
+        try:
+            return next(self.__iterable)
+        except StopIteration as e:
+            return None
+
+    def __iter__(self) -> Iterator[T]:
+        return self.__iterable.__iter__()
 
     def __normalize_iterator(self, iterable: Iterable[T]) -> Iterable[T]:
         #if isinstance(iterable, Iterator):
@@ -123,13 +135,12 @@ class IterableStream(Generic[T]):
         return IterableStream[T](sort)
 
     def each(self) -> Iterable[T]:
+        warnings.warn("Use the stream as iterator instead", DeprecationWarning)
         return self.__iterable
 
     def next(self) -> T | None:
-        try:
-            return next(self.__iterable)
-        except StopIteration as e:
-            return None
+        warnings.warn("Use next(stream) instead", DeprecationWarning)
+        return self.__next__()
 
     @property
     def first(self):

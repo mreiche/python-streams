@@ -95,7 +95,7 @@ def test_list_one():
     data = create_list()
     stream = Stream.of(data)
 
-    assert stream.next().name == "Parent A"
+    assert next(stream).name == "Parent A"
 
 
 def test_list_map():
@@ -154,7 +154,7 @@ def test_list_peak():
 def test_stream_dict():
     stream = Stream.of_dict(create_dict())
 
-    for item in stream.each():
+    for item in stream:
         assert isinstance(item[0], str)
         assert isinstance(item[1], Node)
 
