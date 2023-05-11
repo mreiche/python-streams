@@ -23,6 +23,20 @@ def map_name(entity: Node):
     return entity.name
 
 
+# def test_add_number():
+#     s = 0
+#     numbers = (1,2,3)
+#
+#     @dataclass()
+#     class Vote:
+#         count = 0
+#
+#     vote = Vote()
+#
+#     Stream.of(numbers).peek(lambda x: (vote.count:+=x)[-1]).count()
+#     pass
+
+
 def flat_map_children(parent: Node):
     return parent.children
 
@@ -236,6 +250,13 @@ def test_of_many_numeric_list():
     assert stream.sum() == 51
 
 
+def test_empty():
+    empty = ()
+    assert Stream.of(empty).sum() is None
+    assert Stream.of(empty).max() is None
+    assert Stream.of(empty).min() is None
+
+
 def test_doc():
     stream = Stream.of([1, 2, 3, 4, 5])
 
@@ -286,8 +307,8 @@ def test_object_list_map_key():
 
 def test_object_dict_map_key():
     stream = Stream.of(create_node_dict_list())
-    assert stream.map_keys(("node", "name"), str).filter(lambda name: name.endswith("C")).first.get() == "Node C"
-    assert stream.map_keys(("node", "inexistent"), str).first.is_empty()
+    assert next(stream.map_keys(("node", "name"), str).filter(lambda name: name.endswith("C"))) == "Node C"
+    assert next(stream.map_keys(("node", "inexistent"), str)) is None
 
 
 def test_dict_list_filter_key():
