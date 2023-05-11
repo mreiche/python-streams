@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Iterable
 
 from tinystream import Stream, IterableStream
 
@@ -91,6 +91,10 @@ def create_dict_list():
     return [parent_a.__dict__, parent_b.__dict__]
 
 
+def test_dict_is_iterable():
+    assert isinstance({}, Iterable)
+
+
 def test_list_one():
     data = create_list()
     stream = Stream.of(data)
@@ -151,9 +155,16 @@ def test_list_peak():
     assert stream.peek(extend_name).next().name.endswith("Extended")
 
 
-def test_stream_dict():
+def test_stream_of_dict():
     stream = Stream.of_dict(create_dict())
 
+    for item in stream:
+        assert isinstance(item[0], str)
+        assert isinstance(item[1], Node)
+
+
+def test_stream_dict():
+    stream = Stream.of(create_dict())
     for item in stream:
         assert isinstance(item[0], str)
         assert isinstance(item[1], Node)

@@ -73,6 +73,24 @@ def map_parent(n: Node):
 assert next(stream.map(map_parent)).name == "B"
 ```
 
+### Typed dictionaries
+
+Dictionaries are streamed as `tuple(key, value)`
+
+```python
+children = {"a": Node(name="Child")} 
+stream = Stream.of_dict(children)
+for item in stream:
+    # item[0] is known as str
+    # item[1] is known as Node
+```
+
+This is the same like (but without known types):
+```python
+stream = Stream.of(children)
+```
+
+
 ## Retrieve optional
 
 The `first` property returns a [optional.py:Optional](https://pypi.org/project/optional.py/) 
@@ -112,16 +130,6 @@ Stream.of(list).map_keys(("node", "name"))
 
 ```python
 all_names = Stream.of([child]).map_key("name").join(", ")
-```
-
-### Stream dictionaries
-
-Dictionaries are streamed as `tuple(key, value)`
-
-```python
-children = {"a": child} 
-stream = Stream.of_dict(children)
-values = stream.map_key(1, typehint=Node)
 ```
 
 ## Comparison with other libraries

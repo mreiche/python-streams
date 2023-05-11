@@ -1,8 +1,8 @@
 import functools
 import itertools
-import logging
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator
 import warnings
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator
+
 from optional import Optional
 
 T = TypeVar("T")
@@ -25,10 +25,9 @@ class Stream:
         return IterableStream[T]([]).concat(*iterables)
 
 
-
 class IterableStream(Iterator[T]):
 
-    def __next__(self) -> T|None:
+    def __next__(self) -> T | None:
         try:
             return next(self.__iterable)
         except StopIteration as e:
@@ -38,8 +37,6 @@ class IterableStream(Iterator[T]):
         return self.__iterable.__iter__()
 
     def __normalize_iterator(self, iterable: Iterable[T]) -> Iterable[T]:
-        #if isinstance(iterable, Iterator):
-
         if isinstance(iterable, list):
             return iter(iterable)
         elif isinstance(iterable, dict):
