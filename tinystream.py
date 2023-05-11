@@ -1,9 +1,8 @@
 import functools
 import itertools
+import sys
 import warnings
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator
-
-from optional import Optional
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -139,10 +138,6 @@ class IterableStream(Iterator[T]):
         warnings.warn("Use next(stream) instead", DeprecationWarning)
         return self.__next__()
 
-    @property
-    def first(self):
-        return Optional.of(self.next())
-
     def collect(self):
         """Collects all items to a list and ends the stream"""
         if not self.__collected:
@@ -163,7 +158,10 @@ class IterableStream(Iterator[T]):
         return IterableStream[T](copy)
 
     def reduce(self, cb: Callable[[T, T], R]) -> R:
-        return functools.reduce(cb, self.__iterable)
+        try:
+            return functools.reduce(cb, self.__iterable)
+        except TypeError:
+            return None
 
     def sum(self) -> T:
         """Sums all numbers and ends the stream"""

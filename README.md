@@ -21,7 +21,7 @@ stream \
     .reverse() \                  # collect(), count()
     .limit(2) \
     .concat([4]) \
-    .sum()                        # first, reduce(), max(), min()
+    .sum()                        # reduce(), max(), min()
 ```
 
 ## Typehinting
@@ -88,15 +88,6 @@ for item in stream:
 This is the same like (but without known types):
 ```python
 stream = Stream.of(children)
-```
-
-
-## Retrieve optional
-
-The `first` property returns a [optional.py:Optional](https://pypi.org/project/optional.py/) 
-
-```python
-stream.first.is_present()
 ```
 
 ## End of stream
