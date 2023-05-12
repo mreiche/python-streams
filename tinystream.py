@@ -62,20 +62,11 @@ class IterableStream(Iterator[T]):
         return self.filter_key(key).map(__map_key, R)
 
     def map_keys(self, keys: Iterable[str], typehint: R = None) -> "IterableStream[R]":
-        def _map_keys():
-            for val in self.__iterable:
-                for key in keys:
-                    if isinstance(val, (list, dict, tuple)) and key in val:
-                        val = val[key]
-                    elif hasattr(val, key):
-                        val = getattr(val, key)
-                    else:
-                        val = None
-                        break
-                if val:
-                    yield val
-
-        return IterableStream[R](_map_keys())
+        assert not isinstance(keys, (int, str))
+        inst = self
+        for key in keys:
+            inst = inst.map_key(key)
+        return inst
 
     def filter(self, cb: Callable[[T, T], bool]):
         return IterableStream[T](filter(cb, self.__iterable))
