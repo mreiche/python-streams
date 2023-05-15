@@ -24,27 +24,45 @@ stream \
     .sum()                        # reduce(), max(), min()
 ```
 
+
+## Built-in Optional support
+
+Aggregator functions are *optional*:
+```python
+assert Stream.of((1, 2, 3, 4, 5)).sum().is_empty == False
+```
+
+Get next value as *optional*:
+```python
+Stream.of((1, 2, 3, 4, 5)).next().is_empty = False
+```
+
+Create custom *optional*:
+```python
+from tinystream import Opt
+
+assert Opt(None).is_empty is True
+```
+
+Map optional:
+```python
+assert Opt("String").map(len).get() == 6
+```
+
+Get default value:
+```python
+assert Opt(None).get(6) == 6
+assert Opt(None).get(lambda: 6) == 6
+```
+
+Filter value:
+```python
+assert Opt(0).filter(lambda x: x > 0).is_empty is True
+```
+
 ## Typehinting
 
-Since Python does not support typed lambdas, this library implements a workaround.
-
-```python
-from tinystream import Stream
-
-stream = Stream.of(["A", "B", "C"], str)
-```
-
-This is not necessary when typing is used:
-
-```python
-from tinystream import Stream
-from typing import List
-
-list: List[str] = ["A", "B", "C"]
-stream = Stream.of(list)
-```
-
-Type hinting the given type:
+You can typehint datatypes like:
 
 ```python
 from dataclasses import dataclass
@@ -62,7 +80,7 @@ parent = Node(name="B")
 child = Node(name="A", parent=parent)
 
 stream = Stream.of([child])
-assert next(stream.map(lambda x: x.parent, typehint=Node)).name == "B"
+assert stream.map(lambda x: x.parent, typehint=Node).next().get().name == "B"
 ```
 
 This is not necessary when you pass a mapping function:
@@ -70,7 +88,7 @@ This is not necessary when you pass a mapping function:
 def map_parent(n: Node):
     return n.parent
 
-assert next(stream.map(map_parent)).name == "B"
+assert stream.map(map_parent).next().get().name == "B"
 ```
 
 ### Typed dictionaries

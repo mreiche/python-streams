@@ -23,20 +23,6 @@ def map_name(entity: Node):
     return entity.name
 
 
-# def test_add_number():
-#     s = 0
-#     numbers = (1,2,3)
-#
-#     @dataclass()
-#     class Vote:
-#         count = 0
-#
-#     vote = Vote()
-#
-#     Stream.of(numbers).peek(lambda x: (vote.count:+=x)[-1]).count()
-#     pass
-
-
 def flat_map_children(parent: Node):
     return parent.children
 
@@ -119,6 +105,7 @@ def test_list_one():
 def test_list_map():
     data = create_list()
     stream = Stream.of(data)
+    # Todo: Remove each
     for name in stream.map(map_name).each():
         assert name.startswith("Parent")
 
@@ -126,18 +113,18 @@ def test_list_map():
 def test_list_map_type():
     parent_a, parent_b = create_parents()
     stream = Stream.of(parent_b.children)
-    assert stream.map(lambda x: x.parent, Node).next().name == "Parent B"
+    assert stream.map(lambda x: x.parent, Node).next().get().name == "Parent B"
 
 
 def test_string_one():
-    stream = Stream.of("Hallo Welt", str)
-    assert stream.next() == "H"
+    stream = Stream.of("Hallo Welt")
+    assert stream.next().get() == "H"
 
 
 def test_string_one_ends():
-    stream = Stream.of("H", str)
-    assert stream.next() == "H"
-    assert stream.next() is None
+    stream = Stream.of("H")
+    assert stream.next().get() == "H"
+    assert stream.next().is_empty is True
 
 
 def test_list_flatmap_count():
@@ -152,21 +139,21 @@ def test_list_filter_count():
 
 def test_list_sort():
     stream = Stream.of(create_list())
-    assert stream.sort(compare_name, reverse=True).next().name.endswith("B")
+    assert stream.sort(compare_name, reverse=True).next().get().name.endswith("B")
 
 
 def test_list_reverse():
     stream = Stream.of(create_list())
-    assert stream.reverse().next().name.endswith("B")
+    assert stream.reverse().next().get().name.endswith("B")
 
 
-def test_list_peak():
+def test_list_peek():
     stream = Stream.of(create_list())
 
     def extend_name(x: Node):
         x.name += " Extended"
 
-    assert stream.peek(extend_name).next().name.endswith("Extended")
+    assert stream.peek(extend_name).next().get().name.endswith("Extended")
 
 
 def test_stream_of_dict():
@@ -185,14 +172,14 @@ def test_stream_dict():
 
 
 def assert_fibonacci(stream: IterableStream):
-    assert stream.next() == 1
-    assert stream.next() == 2
-    assert stream.next() == 3
-    assert stream.next() == 5
-    assert stream.next() == 8
-    assert stream.next() == 13
+    assert next(stream) == 1
+    assert next(stream) == 2
+    assert next(stream) == 3
+    assert next(stream) == 5
+    assert next(stream) == 8
+    assert next(stream) == 13
 
-    assert stream.map(lambda x: x - 10).next() == 11
+    assert stream.map(lambda x: x - 10).next().get() == 11
 
 
 def test_generator_one():
@@ -202,42 +189,42 @@ def test_generator_one():
 
 def test_numeric_list_min():
     stream = Stream.of(create_numeric_list())
-    assert stream.min() == 1
+    assert stream.min().get() == 1
 
 
 def test_numeric_list_max():
     stream = Stream.of(create_numeric_list())
-    assert stream.max() == 6
+    assert stream.max().get() == 6
 
 
 def test_numeric_list_sum():
     stream = Stream.of(create_numeric_list())
-    assert stream.sum() == 17
+    assert stream.sum().get() == 17
 
 
 def test_numeric_list_limit():
     stream = Stream.of(create_numeric_list())
-    assert stream.limit(2).sum() == 4
+    assert stream.limit(2).sum().get() == 4
 
 
 def test_string_list_min():
     stream = Stream.of(create_string_list())
-    assert stream.min() == "A"
+    assert stream.min().get() == "A"
 
 
 def test_string_list_max():
     stream = Stream.of(create_string_list())
-    assert stream.max() == "Y"
+    assert stream.max().get() == "Y"
 
 
 def test_string_list_sum():
     stream = Stream.of(create_string_list())
-    assert stream.map(str.lower).sum() == "xya"
+    assert stream.map(str.lower).sum().get() == "xya"
 
 
 def test_numeric_list_concat():
     stream = Stream.of(create_numeric_list())
-    assert stream.concat(create_numeric_list()).sum() == 34
+    assert stream.concat(create_numeric_list()).sum().get() == 34
 
 
 def test_of_many_numeric_list():
@@ -246,15 +233,15 @@ def test_of_many_numeric_list():
         create_numeric_list(),
         create_numeric_list(),
         create_numeric_list()
-        )
-    assert stream.sum() == 51
+    )
+    assert stream.sum().get() == 51
 
 
 def test_empty():
     empty = ()
-    assert Stream.of(empty).sum() is None
-    assert Stream.of(empty).max() is None
-    assert Stream.of(empty).min() is None
+    assert Stream.of(empty).sum().is_empty is True
+    assert Stream.of(empty).max().is_empty is True
+    assert Stream.of(empty).min().is_empty is True
 
 
 def test_doc():
@@ -269,7 +256,7 @@ def test_doc():
         .concat([4]) \
         .sum()
 
-    assert sum == 11
+    assert sum.get() == 11
 
 
 def test_flatmap_list_of_list():
@@ -328,14 +315,14 @@ def test_dict_list_map_key():
 
 def test_dict_map_key():
     stream = Stream.of_dict(create_dict())
-    assert stream.map_key(0).next() == "parent_a"
+    assert stream.map_key(0).next().get() == "parent_a"
 
 
 def test_dict_filter_key_invert():
     stream = Stream.of_dict(create_dict())
-    assert stream.filter_key(0, invert=True).next() is None
+    assert stream.filter_key(0, invert=True).next().is_empty is True
 
 
 def test_dict_map_value():
     stream = Stream.of_dict(create_dict())
-    assert stream.map_key(1, Node).next().name == "Parent A"
+    assert stream.map_key(1, Node).next().get().name == "Parent A"
