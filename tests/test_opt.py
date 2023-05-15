@@ -74,8 +74,12 @@ def test_opt_value_map():
     assert Opt("Hallo").map(len).get() == 5
 
 
-def test_opt_value_filter():
+def test_opt_value_filter_is_empty():
     assert Opt(0).filter(lambda x: x > 0).is_empty is True
+
+
+def test_opt_value_filter_not_empty():
+    assert Opt(1).filter(lambda x: x > 0).is_empty is False
 
 
 def test_opt_empty_filter():
