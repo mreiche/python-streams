@@ -22,11 +22,16 @@ class Opt(Generic[T]):
         self.__val = value
 
     @property
-    def is_empty(self):
+    def empty(self):
         return self.__val is None
 
+    @property
+    def is_empty(self):
+        warnings.warn("Use empty property instead", DeprecationWarning)
+        return self.empty
+
     def get(self, *args) -> T:
-        if self.__val:
+        if not self.empty:
             return self.__val
         elif len(args) > 0:
             if isinstance(args[0], Callable):
@@ -37,11 +42,11 @@ class Opt(Generic[T]):
             raise Exception("Cannot get value of empty Opt without default value")
 
     def if_present(self, consumer: Consumer[T]):
-        if not self.is_empty:
+        if not self.empty:
             consumer(self.get())
 
     def or_else(self, consumer: Callable):
-        if self.is_empty:
+        if self.empty:
             return consumer()
 
     def filter(self, predicate: Predicate[T]):

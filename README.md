@@ -24,27 +24,29 @@ stream \
     .sum()                        # reduce(), max(), min()
 ```
 
-
 ## Built-in Optional support
 
 Aggregator functions are *optional*:
+
 ```python
-assert Stream.of((1, 2, 3, 4, 5)).sum().is_empty == False
+assert Stream.of((1, 2, 3, 4, 5)).sum().empty is False
 ```
 
 Get next value as *optional*:
+
 ```python
-Stream.of((1, 2, 3, 4, 5)).next().is_empty = False
+assert Stream.of((1, 2, 3, 4, 5)).next().empty is False
 ```
 
 Create custom *optional*:
+
 ```python
 from tinystream import Opt
 
-assert Opt(None).is_empty is True
+assert Opt(None).empty is True
 ```
 
-Map optional:
+Map *optional*:
 ```python
 assert Opt("String").map(len).get() == 6
 ```
@@ -56,8 +58,9 @@ assert Opt(None).get(lambda: 6) == 6
 ```
 
 Filter value:
+
 ```python
-assert Opt(0).filter(lambda x: x > 0).is_empty is True
+assert Opt(0).filter(lambda x: x > 0).empty is True
 ```
 
 ## Typehinting

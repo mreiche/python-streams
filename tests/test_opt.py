@@ -4,7 +4,7 @@ from tinystream import Opt
 
 
 def test_opt_empty():
-    assert Opt(None).is_empty
+    assert Opt(None).empty
 
 
 def test_opt_value():
@@ -75,12 +75,12 @@ def test_opt_value_map():
 
 
 def test_opt_value_filter_is_empty():
-    assert Opt(0).filter(lambda x: x > 0).is_empty is True
+    assert Opt(0).filter(lambda x: x > 0).empty is True
 
 
 def test_opt_value_filter_not_empty():
-    assert Opt(1).filter(lambda x: x > 0).is_empty is False
+    assert Opt(1).filter(lambda x: x > 0).empty is False
 
 
 def test_opt_empty_filter():
-    assert Opt(None).filter(lambda x: x is not None).is_empty is True
+    assert Opt(None).filter(lambda x: x is not None).empty is True

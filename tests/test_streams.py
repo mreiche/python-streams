@@ -124,7 +124,7 @@ def test_string_one():
 def test_string_one_ends():
     stream = Stream.of("H")
     assert stream.next().get() == "H"
-    assert stream.next().is_empty is True
+    assert stream.next().empty is True
 
 
 def test_list_flatmap_count():
@@ -239,9 +239,9 @@ def test_of_many_numeric_list():
 
 def test_empty():
     empty = ()
-    assert Stream.of(empty).sum().is_empty is True
-    assert Stream.of(empty).max().is_empty is True
-    assert Stream.of(empty).min().is_empty is True
+    assert Stream.of(empty).sum().empty is True
+    assert Stream.of(empty).max().empty is True
+    assert Stream.of(empty).min().empty is True
 
 
 def test_doc():
@@ -320,7 +320,7 @@ def test_dict_map_key():
 
 def test_dict_filter_key_invert():
     stream = Stream.of_dict(create_dict())
-    assert stream.filter_key(0, invert=True).next().is_empty is True
+    assert stream.filter_key(0, invert=True).next().empty is True
 
 
 def test_dict_map_value():
