@@ -18,15 +18,19 @@ stream \
     .map(lambda x: x + 1) \       # flatmap(), peek(), map_key()
     .filter(lambda x: x > 2) \    # filter_key()
     .sorted(int, reverse=True) \  # sort()
-    .reverse() \                  # collect(), count()
+    .reverse() \
     .limit(2) \
     .concat([4]) \
-    .sum()                        # reduce(), max(), min()
+    .sum()                        # reduce(), max(), min(), collect(), count()
 ```
+
+## Aggregators
+
+Aggregator methods like `sum()`, `collect()`, `count()`... will end the stream.
 
 ## Built-in Optional support
 
-Aggregator functions are *optional*:
+Some aggregator functions are *optional*:
 
 ```python
 assert Stream.of((1, 2, 3, 4, 5)).sum().empty is False
@@ -74,16 +78,16 @@ from dataclasses import dataclass
 class Node:
     name: str
     parent: "Node" = None
+
+parent = Node(name="B")
+child = Node(name="A", parent=parent)
 ```
 
 for lambdas:
 
 ```python
-parent = Node(name="B")
-child = Node(name="A", parent=parent)
-
 stream = Stream.of([child])
-assert stream.map(lambda x: x.parent, typehint=Node).next().get().name == "B"
+assert stream.map(lambda x: x.parent).type(Node).next().get().name == "B"
 ```
 
 This is not necessary when you pass a mapping function:
@@ -111,10 +115,6 @@ This is the same like (but without known types):
 stream = Stream.of(children)
 ```
 
-## End of stream
-
-Calling methods like `sum()`, `collect()`, `count()`... will end the stream.
-
 ## More features
 
 ### Filter by existing key
@@ -135,13 +135,20 @@ list = [
    {"node": Node(name="Node C")},
    {"node": Node(name="Node D")},
 ]
-Stream.of(list).map_keys(("node", "name"))
+Stream.of(list).map_keys("node", "name")
 ```
 
 ### Collected join
 
 ```python
 all_names = Stream.of([child]).map_key("name").join(", ")
+```
+
+### Stream many
+
+```python
+many = Stream.of_many([1, 2, 3], (4, 5, 6))
+many = many.concat([7, 8, 9])
 ```
 
 ## Comparison with other libraries

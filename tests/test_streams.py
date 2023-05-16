@@ -105,8 +105,7 @@ def test_list_one():
 def test_list_map():
     data = create_list()
     stream = Stream.of(data)
-    # Todo: Remove each
-    for name in stream.map(map_name).each():
+    for name in stream.map(map_name):
         assert name.startswith("Parent")
 
 
@@ -229,7 +228,6 @@ def test_numeric_list_concat():
 
 def test_of_many_numeric_list():
     stream = Stream.of_many(
-        int,
         create_numeric_list(),
         create_numeric_list(),
         create_numeric_list()
@@ -294,8 +292,8 @@ def test_object_list_map_key():
 
 def test_object_dict_map_key():
     stream = Stream.of(create_node_dict_list())
-    assert next(stream.map_keys(("node", "name"), str).filter(lambda name: name.endswith("C"))) == "Node C"
-    assert next(stream.map_keys(("node", "inexistent"), str)) is None
+    assert next(stream.map_keys("node", "name").filter(lambda name: name.endswith("C"))) == "Node C"
+    assert next(stream.map_keys("node", "inexistent")) is None
 
 
 def test_dict_list_filter_key():
@@ -325,4 +323,4 @@ def test_dict_filter_key_invert():
 
 def test_dict_map_value():
     stream = Stream.of_dict(create_dict())
-    assert stream.map_key(1, Node).next().get().name == "Parent A"
+    assert stream.map_key(1).type(Node).next().get().name == "Parent A"

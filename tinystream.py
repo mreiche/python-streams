@@ -2,7 +2,7 @@ import functools
 import itertools
 import sys
 import warnings
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -70,8 +70,8 @@ class Stream:
         return IterableStream[Tuple[K, T]](source_dict)
 
     @staticmethod
-    def of_many(typehint: T = None, *iterables):
-        return IterableStream[T]([]).concat(*iterables)
+    def of_many(*iterables):
+        return IterableStream([]).concat(*iterables)
 
 
 class IterableStream(Iterator[T]):
@@ -111,12 +111,14 @@ class IterableStream(Iterator[T]):
 
         return self.filter_key(key).map(__map_key, R)
 
-    def map_keys(self, keys: Iterable[str], typehint: R = None) -> "IterableStream[R]":
-        assert not isinstance(keys, (int, str))
+    def map_keys(self, *iterables) -> "IterableStream":
         inst = self
-        for key in keys:
+        for key in iterables:
             inst = inst.map_key(key)
         return inst
+
+    def type(self, typehint: R) -> "IterableStream[R]":
+        return self
 
     def filter(self, predicate: Predicate[T]):
         return IterableStream[T](filter(predicate, self.__iterable))
@@ -142,7 +144,7 @@ class IterableStream(Iterator[T]):
 
         return self.filter(__filter_key)
 
-    def flatmap(self, mapper: FlatMapper[T, R] = None, typehint: R = None):
+    def flatmap(self, mapper: FlatMapper[T, R] = None, typehint: R = None) -> "IterableStream[R]":
 
         def __flatmap(f, xs):
             return (y for ys in xs for y in f(ys))
@@ -170,10 +172,6 @@ class IterableStream(Iterator[T]):
     def sorted(self, key, reverse: bool = False):
         sort = sorted(self.__iterable, key=key, reverse=reverse)
         return IterableStream[T](sort)
-
-    def each(self) -> Iterable[T]:
-        warnings.warn("Use the stream as iterator instead", DeprecationWarning)
-        return self.__iterable
 
     def next(self) -> Opt[T]:
         return Opt(self.__next__())
