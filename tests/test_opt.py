@@ -74,3 +74,7 @@ def test_opt_empty_filter():
 
 def test_filter_type():
     assert Opt("string").filter_type(int).empty is True
+
+
+def test_type():
+    assert Opt("0").type(int).get() == "0"
