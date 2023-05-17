@@ -1,8 +1,6 @@
 import functools
 import itertools
-import sys
-import warnings
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -53,6 +51,9 @@ class Opt(Generic[T]):
     def map(self, mapper: Mapper[T, R]):
         return Opt[R](mapper(self.__val))
 
+    def type(self, typehint: R) -> "Opt[R]":
+        return self
+
 
 class Stream:
 
@@ -94,19 +95,19 @@ class IterableStream(Iterator[T]):
         self.__iterable = self.__normalize_iterator(iterable)
         self.__collected: List[T] = None
 
-    def map(self, mapper: Mapper[T, R], typehint: R = None):
+    def map(self, mapper: Mapper[T, R]):
         return IterableStream[R](map(mapper, self.__iterable))
 
-    def map_key(self, key: str | int, typehint: R = None) -> "IterableStream[R]":
+    def map_key(self, key: str | int):
         def __map_key(x):
             if isinstance(x, (list, dict, tuple)):
                 return x[key]
             else:
                 return getattr(x, key)
 
-        return self.filter_key(key).map(__map_key, R)
+        return self.filter_key(key).map(__map_key)
 
-    def map_keys(self, *iterables) -> "IterableStream":
+    def map_keys(self, *iterables):
         inst = self
         for key in iterables:
             inst = inst.map_key(key)
@@ -139,7 +140,7 @@ class IterableStream(Iterator[T]):
 
         return self.filter(__filter_key)
 
-    def flatmap(self, mapper: FlatMapper[T, R] = None, typehint: R = None) -> "IterableStream[R]":
+    def flatmap(self, mapper: FlatMapper[T, R] = None):
 
         def __flatmap(f, xs):
             return (y for ys in xs for y in f(ys))
