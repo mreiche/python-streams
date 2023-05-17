@@ -25,11 +25,6 @@ class Opt(Generic[T]):
     def empty(self):
         return self.__val is None
 
-    @property
-    def is_empty(self):
-        warnings.warn("Use empty property instead", DeprecationWarning)
-        return self.empty
-
     def get(self, *args) -> T:
         if not self.empty:
             return self.__val
