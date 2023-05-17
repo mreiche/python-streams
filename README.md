@@ -28,45 +28,6 @@ stream \
 
 Aggregator methods like `sum()`, `collect()`, `count()`... will end the stream.
 
-## Built-in Optional support
-
-Some aggregator functions are *optional*:
-
-```python
-assert Stream.of((1, 2, 3, 4, 5)).sum().empty is False
-```
-
-Get next value as *optional*:
-
-```python
-assert Stream.of((1, 2, 3, 4, 5)).next().empty is False
-```
-
-Create custom *optional*:
-
-```python
-from tinystream import Opt
-
-assert Opt(None).empty is True
-```
-
-Map *optional*:
-```python
-assert Opt("String").map(len).get() == 6
-```
-
-Get default value:
-```python
-assert Opt(None).get(6) == 6
-assert Opt(None).get(lambda: 6) == 6
-```
-
-Filter value:
-
-```python
-assert Opt(0).filter(lambda x: x > 0).empty is True
-```
-
 ## Typehinting
 
 You can typehint datatypes like:
@@ -98,6 +59,48 @@ def map_parent(n: Node):
 assert stream.map(map_parent).next().get().name == "B"
 ```
 
+## Built-in Optional support
+
+Some aggregator functions are *optional*:
+
+```python
+assert Stream.of((1, 2, 3, 4, 5)).sum().empty is False
+```
+
+Get next value as *optional*:
+
+```python
+assert Stream.of((1, 2, 3, 4, 5)).next().empty is False
+```
+
+Create custom *optional*:
+
+```python
+from tinystream import Opt
+
+assert Opt(None).empty is True
+```
+
+Map *optional*:
+```python
+assert Opt("String").map(len).get() == 6
+```
+
+Get default value:
+```python
+assert Opt(None).get(6) == 6
+assert Opt(None).get(lambda: 6) == 6
+assert Opt(None).if_empty(lambda: 3).empty is False
+```
+
+Filter value:
+
+```python
+assert Opt(0).filter(lambda x: x > 0).empty is True
+```
+
+## More features
+
 ### Typed dictionaries
 
 Dictionaries are streamed as `tuple(key, value)`
@@ -114,8 +117,6 @@ This is the same like (but without known types):
 ```python
 stream = Stream.of(children)
 ```
-
-## More features
 
 ### Filter by existing key
 ```python

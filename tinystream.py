@@ -13,6 +13,7 @@ Consumer = Callable[[T], None]
 Comparator = Callable[[T, T], bool]
 Reducer = Callable[[T, T], R]
 Predicate = Callable[[T], bool]
+Supplier = Callable[[], T]
 
 
 class Opt(Generic[T]):
@@ -38,10 +39,6 @@ class Opt(Generic[T]):
         if not self.empty:
             consumer(self.get())
 
-    def or_else(self, consumer: Callable):
-        if self.empty:
-            return consumer()
-
     def filter(self, predicate: Predicate[T]):
         if predicate(self.__val):
             return self
@@ -50,6 +47,12 @@ class Opt(Generic[T]):
 
     def map(self, mapper: Mapper[T, R]):
         return Opt[R](mapper(self.__val))
+
+    def if_empty(self, supplier: Supplier[R]):
+        if self.empty:
+            return Opt[R](supplier())
+        else:
+            return self
 
     def type(self, typehint: Type[R]) -> "Opt[R]":
         return self

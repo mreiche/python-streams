@@ -48,26 +48,12 @@ def test_opt_empty_if_present():
     assert if_present is None
 
 
-def test_opt_value_or_else():
-    or_else = None
-
-    def _else():
-        nonlocal or_else
-        or_else = True
-
-    Opt("Hallo").or_else(_else)
-    assert or_else is None
+def test_opt_value_if_empty():
+    assert Opt("Hallo").if_empty(lambda: "Empty").get() == "Hallo"
 
 
-def test_opt_empty_or_else():
-    or_else = None
-
-    def _else():
-        nonlocal or_else
-        or_else = True
-
-    Opt(None).or_else(_else)
-    assert or_else is True
+def test_opt_empty_if_empty():
+    assert Opt(None).if_empty(lambda: "Empty").get() == "Empty"
 
 
 def test_opt_value_map():
