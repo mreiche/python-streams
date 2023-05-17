@@ -16,7 +16,7 @@ stream = Stream.of([1, 2, 3, 4, 5]) # of_many(*), of_dict()
 
 stream \
     .map(lambda x: x + 1) \       # flatmap(), peek(), map_key()
-    .filter(lambda x: x > 2) \    # filter_key()
+    .filter(lambda x: x > 2) \    # filter_key(), filter_type()
     .sorted(int, reverse=True) \  # sort()
     .reverse() \
     .limit(2) \
@@ -120,6 +120,11 @@ stream = Stream.of(children)
 ### Filter by existing key
 ```python
 items_with_name = Stream.of([child]).filter_key("name")
+```
+
+### Filter by type
+```python
+nodes_only = Stream.of([child]).filter_type(Node)
 ```
 
 ### Map object name attribute

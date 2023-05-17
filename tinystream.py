@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -51,8 +51,11 @@ class Opt(Generic[T]):
     def map(self, mapper: Mapper[T, R]):
         return Opt[R](mapper(self.__val))
 
-    def type(self, typehint: R) -> "Opt[R]":
+    def type(self, typehint: Type[R]) -> "Opt[R]":
         return self
+
+    def filter_type(self, typehint: Type[R]) -> "Opt[R]":
+        return self.filter(lambda x: isinstance(x, typehint))
 
 
 class Stream:
@@ -113,8 +116,11 @@ class IterableStream(Iterator[T]):
             inst = inst.map_key(key)
         return inst
 
-    def type(self, typehint: R) -> "IterableStream[R]":
+    def type(self, typehint: Type[R]) -> "IterableStream[R]":
         return self
+
+    def filter_type(self, typehint: Type[R]) -> "IterableStream[R]":
+        return self.filter(lambda x: isinstance(x, typehint))
 
     def filter(self, predicate: Predicate[T]):
         return IterableStream[T](filter(predicate, self.__iterable))

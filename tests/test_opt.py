@@ -84,3 +84,7 @@ def test_opt_value_filter_not_empty():
 
 def test_opt_empty_filter():
     assert Opt(None).filter(lambda x: x is not None).empty is True
+
+
+def test_filter_type():
+    assert Opt("string").filter_type(int).empty is True

@@ -69,6 +69,10 @@ def create_string_list():
     return ["X", "Y", "A"]
 
 
+def create_mixed_list():
+    return ["X", Node("Node A"), 1]
+
+
 def create_dict():
     parent_a, parent_b = create_parents()
     return {
@@ -112,7 +116,7 @@ def test_list_map():
 def test_list_map_type():
     parent_a, parent_b = create_parents()
     stream = Stream.of(parent_b.children)
-    assert stream.map(lambda x: x.parent, Node).next().get().name == "Parent B"
+    assert stream.map(lambda x: x.parent).next().get().name == "Parent B"
 
 
 def test_string_one():
@@ -128,7 +132,7 @@ def test_string_one_ends():
 
 def test_list_flatmap_count():
     stream = Stream.of(create_list())
-    assert stream.flatmap(lambda x: x.children, Node).count() == 3
+    assert stream.flatmap(lambda x: x.children).count() == 3
 
 
 def test_list_filter_count():
@@ -324,3 +328,8 @@ def test_dict_filter_key_invert():
 def test_dict_map_value():
     stream = Stream.of_dict(create_dict())
     assert stream.map_key(1).type(Node).next().get().name == "Parent A"
+
+
+def test_mixed_list_filter_type():
+    stream = Stream.of(create_mixed_list())
+    assert stream.filter_type(Node).count() == 1
