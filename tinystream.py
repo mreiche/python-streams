@@ -48,9 +48,12 @@ class Opt(Generic[T]):
     def map(self, mapper: Mapper[T, R]):
         return Opt[R](mapper(self.__val))
 
-    def if_empty(self, supplier: Supplier[R]):
+    def if_empty(self, supplier: any|Supplier[R]):
         if self.empty:
-            return Opt[R](supplier())
+            if isinstance(supplier, Callable):
+                return Opt[R](supplier())
+            else:
+                return Opt[R](supplier)
         else:
             return self
 

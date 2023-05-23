@@ -48,12 +48,16 @@ def test_opt_empty_if_present():
     assert if_present is None
 
 
-def test_opt_value_if_empty():
+def test_opt_value_if_empty_callable():
     assert Opt("Hallo").if_empty(lambda: "Empty").get() == "Hallo"
 
 
-def test_opt_empty_if_empty():
+def test_opt_empty_if_empty_callable():
     assert Opt(None).if_empty(lambda: "Empty").get() == "Empty"
+
+
+def test_opt_empty_if_empty_value():
+    assert Opt(None).if_empty("Empty").get() == "Empty"
 
 
 def test_opt_value_map():
