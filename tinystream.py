@@ -16,6 +16,32 @@ Predicate = Callable[[T], bool]
 Supplier = Callable[[], T]
 
 
+def _filter_key(x: any, key: any, invert: bool = False):
+    if isinstance(x, (list, tuple)):
+        size = len(x)
+        if invert:
+            return key >= size
+        else:
+            return key < size
+    elif isinstance(x, (dict, Iterable)):
+        if invert:
+            return key not in x
+        else:
+            return key in x
+    else:
+        if invert:
+            return not hasattr(x, key)
+        else:
+            return hasattr(x, key)
+
+
+def _map_key(x: any, key: any):
+    if isinstance(x, (list, dict, tuple)):
+        return x[key]
+    else:
+        return getattr(x, key)
+
+
 class Opt(Generic[T]):
     def __init__(self, value: T):
         self.__val = value
@@ -63,6 +89,18 @@ class Opt(Generic[T]):
     def filter_type(self, typehint: Type[R]) -> "Opt[R]":
         return self.filter(lambda x: isinstance(x, typehint))
 
+    def filter_key(self, key: str | int, invert: bool = False):
+        if _filter_key(self.__val, key, invert):
+            return self
+        else:
+            return Opt(None)
+
+    def map_key(self, key: str | int):
+        if _filter_key(self.__val, key):
+            return Opt(_map_key(self.__val, key))
+        else:
+            return Opt(None)
+
 
 class Stream:
 
@@ -108,13 +146,7 @@ class IterableStream(Iterator[T]):
         return IterableStream[R](map(mapper, self.__iterable))
 
     def map_key(self, key: str | int):
-        def __map_key(x):
-            if isinstance(x, (list, dict, tuple)):
-                return x[key]
-            else:
-                return getattr(x, key)
-
-        return self.filter_key(key).map(__map_key)
+        return self.filter_key(key).map(lambda x: _map_key(x, key))
 
     def map_keys(self, *iterables):
         inst = self
@@ -132,25 +164,7 @@ class IterableStream(Iterator[T]):
         return IterableStream[T](filter(predicate, self.__iterable))
 
     def filter_key(self, key: str | int, invert: bool = False):
-        def __filter_key(x):
-            if isinstance(x, (list, tuple)):
-                size = len(x)
-                if invert:
-                    return key >= size
-                else:
-                    return key < size
-            elif isinstance(x, (dict, Iterable)):
-                if invert:
-                    return key not in x
-                else:
-                    return key in x
-            else:
-                if invert:
-                    return not hasattr(x, key)
-                else:
-                    return hasattr(x, key)
-
-        return self.filter(__filter_key)
+        return self.filter(lambda x: _filter_key(x, key, invert))
 
     def flatmap(self, mapper: FlatMapper[T, R] = None):
 
