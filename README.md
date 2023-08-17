@@ -169,6 +169,7 @@ if char == "a":
 
 There are a couple of other implementation to fulfill similar requirements.
 
+- https://github.com/vxgmichel/aiostream (most professional)
 - https://github.com/alemazzo/Python-Java-Stream
 - https://github.com/ramsteak/streams
 - https://pypi.org/project/fluentpy
