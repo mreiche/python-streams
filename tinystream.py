@@ -124,22 +124,27 @@ class IterableStream(Iterator[T]):
         self.__collected: List[T] = None
         self.__on_end: Callable = None
 
-    def on_end(self, cb: Callable) -> Iterable[T]:
+    def on_end(self, cb: Callable) -> "IterableStream[R]":
+        if self.__on_end:
+            raise AttributeError("on_end is immutable")
         self.__on_end = cb
         return self
+
+    def end(self):
+        if self.__on_end:
+            self.__on_end()
+            self.__iterable = iter([])
+            self.__on_end = None
 
     def __next__(self) -> T | None:
         try:
             return next(self.__iterable)
         except StopIteration as e:
-            if self.__on_end:
-                self.__on_end()
+            self.end()
             raise e
 
     def __iter__(self) -> Iterator[T]:
         return self
-        #self.__iterable.__iter__()
-        #return (n for n in self.__next__())
 
     def __normalize_iterator(self, iterable: Iterable[T]) -> Iterable[T]:
         if isinstance(iterable, list):

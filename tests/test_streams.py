@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Iterable
 
+import pytest
+
 from tinystream import Stream, IterableStream
 
 
@@ -347,3 +349,27 @@ def test_on_end():
         assert closed is False
 
     assert closed is True
+
+
+def test_call_end():
+    closed = False
+
+    def close():
+        nonlocal closed
+        closed = True
+
+    called = 0
+
+    stream = Stream.of(["a", "b", "c"]).on_end(close)
+    for _ in stream:
+        called += 1
+        assert closed is False
+        stream.end()
+
+    assert closed is True
+    assert called == 1
+
+
+def test_on_end_twice():
+    with pytest.raises(AttributeError, match="on_end is immutable") as e:
+        Stream.of(["a", "b", "c"]).on_end(lambda: None).on_end(lambda: None)
