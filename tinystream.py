@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type, Self
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -124,7 +124,7 @@ class IterableStream(Iterator[T]):
         self.__collected: List[T] = None
         self.__on_end: Callable = None
 
-    def on_end(self, cb: Callable) -> Self:
+    def on_end(self, cb: Callable) -> Iterable[T]:
         self.__on_end = cb
         return self
 
