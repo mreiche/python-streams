@@ -160,6 +160,9 @@ many = many.concat([7, 8, 9])
 ### End of stream
 ```python
 stream = Stream.of(["a", "b", "c"]).on_end(lambda: print("Finished"))
+char = stream.next().get()
+if char == "a":
+    stream.end()
 ```
 
 ## Comparison with other libraries
