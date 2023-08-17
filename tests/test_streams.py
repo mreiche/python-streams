@@ -269,7 +269,7 @@ def test_flatmap_list_of_list():
 
 def test_flatmap_generator():
     stream = Stream.of(create_numeric_list())\
-        .flatmap(fibonacci)\
+        .flatmap(fibonacci)
 
     assert_fibonacci(stream)
 
@@ -296,8 +296,8 @@ def test_object_list_map_key():
 
 def test_object_dict_map_key():
     stream = Stream.of(create_node_dict_list())
-    assert next(stream.map_keys("node", "name").filter(lambda name: name.endswith("C"))) == "Node C"
-    assert next(stream.map_keys("node", "inexistent")) is None
+    assert stream.map_keys("node", "name").filter(lambda name: name.endswith("C")).next().get() == "Node C"
+    assert stream.map_keys("node", "inexistent").next().empty is True
 
 
 def test_dict_list_filter_key():
@@ -333,3 +333,17 @@ def test_dict_map_value():
 def test_mixed_list_filter_type():
     stream = Stream.of(create_mixed_list())
     assert stream.filter_type(Node).count() == 1
+
+
+def test_on_end():
+    closed = False
+
+    def close():
+        nonlocal closed
+        closed = True
+
+    stream = Stream.of(["a", "b", "c"]).on_end(close)
+    for _ in stream:
+        assert closed is False
+
+    assert closed is True

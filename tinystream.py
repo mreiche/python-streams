@@ -1,6 +1,6 @@
 import functools
 import itertools
-from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
+from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type, Self
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -119,14 +119,27 @@ class Stream:
 
 class IterableStream(Iterator[T]):
 
+    def __init__(self, iterable: Iterable[T]):
+        self.__iterable = self.__normalize_iterator(iterable)
+        self.__collected: List[T] = None
+        self.__on_end: Callable = None
+
+    def on_end(self, cb: Callable) -> Self:
+        self.__on_end = cb
+        return self
+
     def __next__(self) -> T | None:
         try:
             return next(self.__iterable)
         except StopIteration as e:
-            return None
+            if self.__on_end:
+                self.__on_end()
+            raise e
 
     def __iter__(self) -> Iterator[T]:
-        return self.__iterable.__iter__()
+        return self
+        #self.__iterable.__iter__()
+        #return (n for n in self.__next__())
 
     def __normalize_iterator(self, iterable: Iterable[T]) -> Iterable[T]:
         if isinstance(iterable, list):
@@ -138,12 +151,8 @@ class IterableStream(Iterator[T]):
         else:
             return iterable
 
-    def __init__(self, iterable: Iterable[T]):
-        self.__iterable = self.__normalize_iterator(iterable)
-        self.__collected: List[T] = None
-
     def map(self, mapper: Mapper[T, R]):
-        return IterableStream[R](map(mapper, self.__iterable))
+        return IterableStream[R](map(mapper, self))
 
     def map_key(self, key: str | int):
         return self.filter_key(key).map(lambda x: _map_key(x, key))
@@ -175,16 +184,16 @@ class IterableStream(Iterator[T]):
             return (y for ys in xs for y in ys)
 
         if mapper is not None:
-            return IterableStream[R](__flatmap(mapper, self.__iterable))
+            return IterableStream[R](__flatmap(mapper, self))
         else:
-            return IterableStream[R](__flatten(self.__iterable))
+            return IterableStream[R](__flatten(self))
 
     def peek(self, consumer: Consumer[T]):
         def __peek(x: T):
             consumer(x)
             return x
 
-        return IterableStream[T](map(__peek, self.__iterable))
+        return IterableStream[T](map(__peek, self))
 
     def sort(self, compare: Comparator[T], reverse: bool = False):
         key = functools.cmp_to_key(compare)
@@ -196,17 +205,21 @@ class IterableStream(Iterator[T]):
         return IterableStream[T](sort)
 
     def next(self) -> Opt[T]:
-        return Opt(self.__next__())
+        try:
+            next = self.__next__()
+        except StopIteration as e:
+            next = None
+        return Opt(next)
 
     def collect(self):
         """Collects all items to a list and ends the stream"""
         if not self.__collected:
-            self.__collected = list(self.__iterable)
+            self.__collected = list(self)
         return self.__collected
 
     def join(self, separator: str) -> str:
         """Joins the string to the elements and ends the stream"""
-        return separator.join(map(str, self.__iterable))
+        return separator.join(map(str, self))
 
     def count(self):
         """Collects and counts all items and ends the stream"""
@@ -219,7 +232,7 @@ class IterableStream(Iterator[T]):
 
     def reduce(self, cb: Reducer) -> Opt[R]:
         try:
-            return Opt(functools.reduce(cb, self.__iterable))
+            return Opt(functools.reduce(cb, self))
         except TypeError:
             return Opt(None)
 
@@ -241,7 +254,7 @@ class IterableStream(Iterator[T]):
         return IterableStream[T](__limit())
 
     def concat(self, *iterables):
-        iterators = [self.__iterable]
+        iterators = [self]
         for iterator in iterables:
             iterators.append(self.__normalize_iterator(iterator))
 
