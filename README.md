@@ -157,6 +157,11 @@ many = Stream.of_many([1, 2, 3], (4, 5, 6))
 many = many.concat([7, 8, 9])
 ```
 
+### End of stream
+```python
+stream = Stream.of(["a", "b", "c"]).on_end(lambda: print("Finished"))
+```
+
 ## Comparison with other libraries
 
 There are a couple of other implementation to fulfill similar requirements.
