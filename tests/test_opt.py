@@ -116,3 +116,13 @@ def test_map_keys():
     empty_opt = opt.map_keys("inexistent")
     assert empty_opt.filter_key("inexistent") == empty_opt
     assert empty_opt.filter(lambda x: x is not None) == empty_opt
+
+
+def test_stream():
+    data = {
+        "list": [1, 2, 3]
+    }
+
+    opt = Opt(data)
+    assert opt.map_key("list").stream().sum().get() == 6
+    assert opt.map_key("inexistent").stream().sum().empty

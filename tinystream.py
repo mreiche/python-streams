@@ -107,6 +107,9 @@ class Opt(Generic[T]):
             inst = inst.map_key(key)
         return inst
 
+    def stream(self):
+        return Stream.of(self.__val)
+
 
 class EmptyOpt(Opt[None]):
     def __init__(self):
@@ -124,6 +127,9 @@ class EmptyOpt(Opt[None]):
     @property
     def empty(self):
         return True
+
+    def stream(self):
+        return Stream.of([])
 
 
 class Stream:
