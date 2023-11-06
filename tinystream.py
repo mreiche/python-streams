@@ -1,6 +1,5 @@
 import functools
 import itertools
-from abc import abstractmethod, ABC
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 
 T = TypeVar("T")

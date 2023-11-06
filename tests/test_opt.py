@@ -108,6 +108,11 @@ def test_map_keys():
             }
         }
     }
-    assert Opt(data).map_keys("address", "street", "name").get() == "Grove"
-    assert Opt(data).map_keys("address", "street", "number").empty is True
-    assert Opt(data).map_keys("person", "name", "first").empty is True
+    opt = Opt(data)
+    assert opt.map_keys("address", "street", "name").get() == "Grove"
+    assert opt.map_keys("address", "street", "number").empty is True
+    assert opt.map_keys("person", "name", "first").empty is True
+
+    empty_opt = opt.map_keys("inexistent")
+    assert empty_opt.filter_key("inexistent") == empty_opt
+    assert empty_opt.filter(lambda x: x is not None) == empty_opt
