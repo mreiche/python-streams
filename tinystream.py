@@ -1,5 +1,6 @@
 import functools
 import itertools
+from abc import abstractmethod, ABC
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 
 T = TypeVar("T")
@@ -69,7 +70,7 @@ class Opt(Generic[T]):
         if predicate(self.__val):
             return self
         else:
-            return Opt(None)
+            return EmptyOpt()
 
     def map(self, mapper: Mapper[T, R]):
         return Opt[R](mapper(self.__val))
@@ -93,13 +94,37 @@ class Opt(Generic[T]):
         if _filter_key(self.__val, key, invert):
             return self
         else:
-            return Opt(None)
+            return EmptyOpt()
 
     def map_key(self, key: str | int):
         if _filter_key(self.__val, key):
             return Opt(_map_key(self.__val, key))
         else:
-            return Opt(None)
+            return EmptyOpt()
+
+    def map_keys(self, *iterables):
+        inst = self
+        for key in iterables:
+            inst = inst.map_key(key)
+        return inst
+
+
+class EmptyOpt(Opt[None]):
+    def __init__(self):
+        super().__init__(None)
+
+    def filter(self, predicate: Predicate[T]):
+        return self
+
+    def map_key(self, key: str | int):
+        return self
+
+    def filter_key(self, key: str | int, invert: bool = False):
+        return self
+
+    @property
+    def empty(self):
+        return True
 
 
 class Stream:

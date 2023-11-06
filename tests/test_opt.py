@@ -98,3 +98,16 @@ def test_map_key_value():
 
 def test_map_key_empty():
     assert Opt({"name": "Hallo"}).map_key("inexistent").empty is True
+
+
+def test_map_keys():
+    data = {
+        "address": {
+            "street": {
+                "name": "Grove"
+            }
+        }
+    }
+    assert Opt(data).map_keys("address", "street", "name").get() == "Grove"
+    assert Opt(data).map_keys("address", "street", "number").empty is True
+    assert Opt(data).map_keys("person", "name", "first").empty is True
