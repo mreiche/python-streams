@@ -3,8 +3,9 @@ import pytest
 from tinystream import Opt
 
 
-def test_opt_empty():
+def test_opt_absent():
     assert Opt(None).empty
+    assert Opt(None).absent
 
 
 def test_opt_value():
@@ -48,15 +49,16 @@ def test_opt_empty_if_present():
     assert if_present is None
 
 
-def test_opt_value_if_empty_callable():
-    assert Opt("Hallo").if_empty(lambda: "Empty").get() == "Hallo"
+def test_opt_value_if_absent_callable():
+    assert Opt("Hallo").if_absent(lambda: "Empty").get() == "Hallo"
 
 
 def test_opt_empty_if_empty_callable():
-    assert Opt(None).if_empty(lambda: "Empty").get() == "Empty"
+    assert Opt(None).if_absent(lambda: "Empty").get() == "Empty"
 
 
 def test_opt_empty_if_empty_value():
+    assert Opt(None).if_absent("Empty").get() == "Empty"
     assert Opt(None).if_empty("Empty").get() == "Empty"
 
 
@@ -65,19 +67,19 @@ def test_opt_value_map():
 
 
 def test_opt_value_filter_is_empty():
-    assert Opt(0).filter(lambda x: x > 0).empty is True
+    assert Opt(0).filter(lambda x: x > 0).absent
 
 
 def test_opt_value_filter_not_empty():
-    assert Opt(1).filter(lambda x: x > 0).empty is False
+    assert Opt(1).filter(lambda x: x > 0).present
 
 
 def test_opt_empty_filter():
-    assert Opt(None).filter(lambda x: x is not None).empty is True
+    assert Opt(None).filter(lambda x: x is not None).absent
 
 
 def test_filter_type():
-    assert Opt("string").filter_type(int).empty is True
+    assert Opt("string").filter_type(int).absent
 
 
 def test_type():
@@ -85,11 +87,11 @@ def test_type():
 
 
 def test_filter_key_value():
-    assert Opt({"name": "Hallo"}).filter_key("name").empty is False
+    assert Opt({"name": "Hallo"}).filter_key("name").present
 
 
 def test_filter_key_empty():
-    assert Opt({"name": "Hallo"}).filter_key("inexistent").empty is True
+    assert Opt({"name": "Hallo"}).filter_key("inexistent").absent
 
 
 def test_map_key_value():
@@ -97,7 +99,7 @@ def test_map_key_value():
 
 
 def test_map_key_empty():
-    assert Opt({"name": "Hallo"}).map_key("inexistent").empty is True
+    assert Opt({"name": "Hallo"}).map_key("inexistent").absent
 
 
 def test_map_keys():
@@ -110,8 +112,8 @@ def test_map_keys():
     }
     opt = Opt(data)
     assert opt.map_keys("address", "street", "name").get() == "Grove"
-    assert opt.map_keys("address", "street", "number").empty is True
-    assert opt.map_keys("person", "name", "first").empty is True
+    assert opt.map_keys("address", "street", "number").absent
+    assert opt.map_keys("person", "name", "first").absent
 
     empty_opt = opt.map_keys("inexistent")
     assert empty_opt.filter_key("inexistent") == empty_opt
@@ -125,4 +127,4 @@ def test_stream():
 
     opt = Opt(data)
     assert opt.map_key("list").stream().sum().get() == 6
-    assert opt.map_key("inexistent").stream().sum().empty
+    assert opt.map_key("inexistent").stream().sum().absent

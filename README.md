@@ -64,13 +64,13 @@ assert stream.map(map_parent).next().get().name == "B"
 Some aggregator functions are *optional*:
 
 ```python
-assert Stream.of((1, 2, 3, 4, 5)).sum().empty is False
+assert Stream.of((1, 2, 3, 4, 5)).sum().present
 ```
 
 Get next value as *optional*:
 
 ```python
-assert Stream.of((1, 2, 3, 4, 5)).next().empty is False
+assert Stream.of((1, 2, 3, 4, 5)).next().present
 ```
 
 Create custom *optional*:
@@ -78,7 +78,7 @@ Create custom *optional*:
 ```python
 from tinystream import Opt
 
-assert Opt(None).empty is True
+assert Opt(None).absent
 ```
 
 Map *optional*:
@@ -90,13 +90,13 @@ Get default value:
 ```python
 assert Opt(None).get(6) == 6
 assert Opt(None).get(lambda: 6) == 6
-assert Opt(None).if_empty(lambda: 3).empty is False
+assert Opt(None).if_absent(lambda: 3).present
 ```
 
 Filter value:
 
 ```python
-assert Opt(0).filter(lambda x: x > 0).empty is True
+assert Opt(0).filter(lambda x: x > 0).absent
 ```
 
 ## More features
