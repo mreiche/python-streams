@@ -1,6 +1,8 @@
 import functools
 import itertools
+import logging
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
+from warnings import warn
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -48,7 +50,16 @@ class Opt(Generic[T]):
 
     @property
     def empty(self):
+        warn("Please use absent property instead", DeprecationWarning)
+        return self.absent
+
+    @property
+    def absent(self):
         return self.__val is None
+
+    @property
+    def present(self):
+        return not self.absent
 
     def get(self, *args) -> T:
         if not self.empty:
@@ -75,7 +86,11 @@ class Opt(Generic[T]):
         return Opt[R](mapper(self.__val))
 
     def if_empty(self, supplier: any|Supplier[R]):
-        if self.empty:
+        warn("Please use if_absent() method instead", DeprecationWarning)
+        return self.if_absent(supplier)
+
+    def if_absent(self, supplier: any|Supplier[R]):
+        if self.absent:
             if isinstance(supplier, Callable):
                 return Opt[R](supplier())
             else:
@@ -125,7 +140,7 @@ class EmptyOpt(Opt[None]):
         return self
 
     @property
-    def empty(self):
+    def absent(self):
         return True
 
     def stream(self):
