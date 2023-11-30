@@ -309,3 +309,6 @@ class IterableStream(Iterator[T]):
             iterators.append(self.__normalize_iterator(iterator))
 
         return IterableStream[T](itertools.chain(*iterators))
+
+    def find(self, predicate: Predicate[T]) -> Opt[T]:
+        return self.filter(predicate).next()

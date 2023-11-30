@@ -299,7 +299,14 @@ def test_object_list_map_key():
 def test_object_dict_map_key():
     stream = Stream.of(create_node_dict_list())
     assert stream.map_keys("node", "name").filter(lambda name: name.endswith("C")).next().get() == "Node C"
-    assert stream.map_keys("node", "inexistent").next().empty is True
+    assert stream.map_keys("node", "inexistent").next().absent
+
+
+def test_find():
+    stream = Stream.of(create_string_list())
+    find = stream.find(lambda s: s == "Y")
+    assert find.present
+    assert find.get() == "Y"
 
 
 def test_dict_list_filter_key():
