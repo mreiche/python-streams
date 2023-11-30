@@ -165,6 +165,31 @@ if char == "a":
     stream.end()
 ```
 
+## Examples
+
+A given data structure like:
+```python
+data = {
+   "ranges": [
+      timedelta(days=3),
+   ]
+}
+```
+
+Without tinystream:
+```python
+if "ranges" in data:
+    range_data: timedelta
+    for range_data in filter(lambda x: isinstance(x, timedelta), data["ranges"]):
+        pass
+```
+
+With tinystream:
+```python
+for range_data in Opt(data).map_key("ranges").stream().filter_type(timedelta):
+    pass
+```
+
 ## Comparison with other libraries
 
 There are a couple of other implementation to fulfill similar requirements.
