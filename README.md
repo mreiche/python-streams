@@ -21,14 +21,14 @@ stream \
     .reverse() \
     .limit(2) \
     .concat([4]) \
-    .sum()                        # reduce(), max(), min(), collect(), count()
+    .sum()                        # reduce(), max(), min(), collect(), count(), find()
 ```
 
 ## Aggregators
 
 Aggregator methods like `sum()`, `collect()`, `count()`... will end the stream.
 
-## Typehinting
+## Type hinting
 
 You can typehint datatypes like:
 
