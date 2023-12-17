@@ -1,6 +1,5 @@
 import functools
 import itertools
-import logging
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
 from warnings import warn
 
@@ -62,7 +61,7 @@ class Opt(Generic[T]):
         return not self.absent
 
     def get(self, *args) -> T:
-        if not self.empty:
+        if self.present:
             return self.__val
         elif len(args) > 0:
             if isinstance(args[0], Callable):
@@ -73,7 +72,7 @@ class Opt(Generic[T]):
             raise Exception("Cannot get value of empty Opt without default value")
 
     def if_present(self, consumer: Consumer[T]):
-        if not self.empty:
+        if self.present:
             consumer(self.get())
 
     def filter(self, predicate: Predicate[T]):
@@ -123,7 +122,7 @@ class Opt(Generic[T]):
         return inst
 
     def stream(self):
-        return Stream.of(self.__val)
+        return Stream(self.__val)
 
 
 class EmptyOpt(Opt[None]):
@@ -144,32 +143,30 @@ class EmptyOpt(Opt[None]):
         return True
 
     def stream(self):
-        return Stream.of([])
+        return Stream([])
 
 
-class Stream:
-
-    @staticmethod
-    def of(iterable: Iterable[T]):
-        return IterableStream[T](iterable)
-
-    @staticmethod
-    def of_dict(source_dict: Dict[K, T]):
-        return IterableStream[Tuple[K, T]](source_dict)
-
-    @staticmethod
-    def of_many(*iterables):
-        return IterableStream([]).concat(*iterables)
-
-
-class IterableStream(Iterator[T]):
+class Stream(Iterator[T]):
 
     def __init__(self, iterable: Iterable[T]):
         self.__iterable = self.__normalize_iterator(iterable)
         self.__collected: List[T] = None
         self.__on_end: Callable = None
 
-    def on_end(self, cb: Callable) -> "IterableStream[R]":
+    @staticmethod
+    def of(iterable: Iterable[T]):
+        warn("Use constructor", DeprecationWarning)
+        return Stream[T](iterable)
+
+    @staticmethod
+    def of_dict(source_dict: Dict[K, T]):
+        return Stream[Tuple[K, T]](source_dict)
+
+    @staticmethod
+    def of_many(*iterables):
+        return Stream([]).concat(*iterables)
+
+    def on_end(self, cb: Callable) -> "Stream[R]":
         if self.__on_end:
             raise AttributeError("on_end is immutable")
         self.__on_end = cb
@@ -202,7 +199,7 @@ class IterableStream(Iterator[T]):
             return iterable
 
     def map(self, mapper: Mapper[T, R]):
-        return IterableStream[R](map(mapper, self))
+        return Stream[R](map(mapper, self))
 
     def map_key(self, key: str | int):
         return self.filter_key(key).map(lambda x: _map_key(x, key))
@@ -213,14 +210,14 @@ class IterableStream(Iterator[T]):
             inst = inst.map_key(key)
         return inst
 
-    def type(self, typehint: Type[R]) -> "IterableStream[R]":
+    def type(self, typehint: Type[R]) -> "Stream[R]":
         return self
 
-    def filter_type(self, typehint: Type[R]) -> "IterableStream[R]":
+    def filter_type(self, typehint: Type[R]) -> "Stream[R]":
         return self.filter(lambda x: isinstance(x, typehint))
 
     def filter(self, predicate: Predicate[T]):
-        return IterableStream[T](filter(predicate, self.__iterable))
+        return Stream[T](filter(predicate, self.__iterable))
 
     def filter_key(self, key: str | int, invert: bool = False):
         return self.filter(lambda x: _filter_key(x, key, invert))
@@ -234,25 +231,25 @@ class IterableStream(Iterator[T]):
             return (y for ys in xs for y in ys)
 
         if mapper is not None:
-            return IterableStream[R](__flatmap(mapper, self))
+            return Stream[R](__flatmap(mapper, self))
         else:
-            return IterableStream[R](__flatten(self))
+            return Stream[R](__flatten(self))
 
     def peek(self, consumer: Consumer[T]):
         def __peek(x: T):
             consumer(x)
             return x
 
-        return IterableStream[T](map(__peek, self))
+        return Stream[T](map(__peek, self))
 
     def sort(self, compare: Comparator[T], reverse: bool = False):
         key = functools.cmp_to_key(compare)
         sort = sorted(self.__iterable, key=key, reverse=reverse)
-        return IterableStream[T](sort)
+        return Stream[T](sort)
 
     def sorted(self, key, reverse: bool = False):
         sort = sorted(self.__iterable, key=key, reverse=reverse)
-        return IterableStream[T](sort)
+        return Stream[T](sort)
 
     def next(self) -> Opt[T]:
         try:
@@ -267,6 +264,13 @@ class IterableStream(Iterator[T]):
             self.__collected = list(self)
         return self.__collected
 
+    def __getitem__(self, index: int) -> Opt[T]:
+        collection = self.collect()
+        if 0 <= index < len(collection):
+            return Opt(collection[index])
+        else:
+            return EmptyOpt()
+
     def join(self, separator: str) -> str:
         """Joins the string to the elements and ends the stream"""
         return separator.join(map(str, self))
@@ -278,7 +282,7 @@ class IterableStream(Iterator[T]):
     def reverse(self):
         copy = self.collect().copy()
         copy.reverse()
-        return IterableStream[T](copy)
+        return Stream[T](copy)
 
     def reduce(self, cb: Reducer) -> Opt[R]:
         try:
@@ -301,14 +305,14 @@ class IterableStream(Iterator[T]):
             for i in range(limit):
                 yield self.__next__()
 
-        return IterableStream[T](__limit())
+        return Stream[T](__limit())
 
     def concat(self, *iterables):
         iterators = [self]
         for iterator in iterables:
             iterators.append(self.__normalize_iterator(iterator))
 
-        return IterableStream[T](itertools.chain(*iterators))
+        return Stream[T](itertools.chain(*iterators))
 
     def find(self, predicate: Predicate[T]) -> Opt[T]:
         return self.filter(predicate).next()

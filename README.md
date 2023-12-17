@@ -12,7 +12,7 @@ This package is release as `tinystream` at pypi.
 ```python
 from tinystream import Stream
 
-stream = Stream.of([1, 2, 3, 4, 5]) # of_many(*), of_dict()
+stream = Stream([1, 2, 3, 4, 5])  # Stream.of_many(*), Stream.of_dict()
 
 stream \
     .map(lambda x: x + 1) \       # flatmap(), peek(), map_key()
@@ -26,51 +26,20 @@ stream \
 
 ## Aggregators
 
-Aggregator methods like `sum()`, `collect()`, `count()`... will end the stream.
-
-## Type hinting
-
-You can typehint datatypes like:
-
-```python
-from dataclasses import dataclass
-
-@dataclass
-class Node:
-    name: str
-    parent: "Node" = None
-
-parent = Node(name="B")
-child = Node(name="A", parent=parent)
-```
-
-for lambdas:
-
-```python
-stream = Stream.of([child])
-assert stream.map(lambda x: x.parent).type(Node).next().get().name == "B"
-```
-
-This is not necessary when you pass a mapping function:
-```python
-def map_parent(n: Node):
-    return n.parent
-
-assert stream.map(map_parent).next().get().name == "B"
-```
+Aggregators like `sum()`, `count()`, `max()` will `collect()` the data and end the stream. `collect()` also caches the data and can be called multiple times, since it returns only a `list`.
 
 ## Built-in Optional support
 
-Some aggregator functions are *optional*:
+Some aggregators like `sum()`, `max()` are *optional*:
 
 ```python
-assert Stream.of((1, 2, 3, 4, 5)).sum().present
+assert Stream((1, 2, 3, 4, 5)).sum().present
 ```
 
 Get next value as *optional*:
 
 ```python
-assert Stream.of((1, 2, 3, 4, 5)).next().present
+assert Stream((1, 2, 3, 4, 5)).next().present
 ```
 
 Create custom *optional*:
@@ -99,6 +68,42 @@ Filter value:
 assert Opt(0).filter(lambda x: x > 0).absent
 ```
 
+You can also access optional index elements of the stream, but this will `collect()` and end the stream.
+```python
+assert Stream([])[2].absent
+```
+
+## Type hinting
+
+You can typehint datatypes like:
+
+```python
+from dataclasses import dataclass
+
+@dataclass
+class Node:
+    name: str
+    parent: "Node" = None
+
+parent = Node(name="B")
+child = Node(name="A", parent=parent)
+```
+
+for lambdas:
+
+```python
+stream = Stream([child])
+assert stream.map(lambda x: x.parent).type(Node).next().get().name == "B"
+```
+
+This is not necessary when you pass a mapping function:
+```python
+def map_parent(n: Node):
+    return n.parent
+
+assert stream.map(map_parent).next().get().name == "B"
+```
+
 ## More features
 
 ### Typed dictionaries
@@ -115,22 +120,22 @@ for item in stream:
 
 This is the same like (but without known types):
 ```python
-stream = Stream.of(children)
+stream = Stream(children)
 ```
 
 ### Filter by existing key
 ```python
-items_with_name = Stream.of([child]).filter_key("name")
+items_with_name = Stream([child]).filter_key("name")
 ```
 
 ### Filter by type
 ```python
-nodes_only = Stream.of([child]).filter_type(Node)
+nodes_only = Stream([child]).filter_type(Node)
 ```
 
 ### Map object name attribute
 ```python
-names = Stream.of([child]).map_key("name")
+names = Stream([child]).map_key("name")
 ```
 
 ### Deep mapping of name attributes
@@ -141,13 +146,13 @@ list = [
    {"node": Node(name="Node C")},
    {"node": Node(name="Node D")},
 ]
-Stream.of(list).map_keys("node", "name")
+Stream(list).map_keys("node", "name")
 ```
 
 ### Collected join
 
 ```python
-all_names = Stream.of([child]).map_key("name").join(", ")
+all_names = Stream([child]).map_key("name").join(", ")
 ```
 
 ### Stream many
@@ -159,7 +164,7 @@ many = many.concat([7, 8, 9])
 
 ### End of stream
 ```python
-stream = Stream.of(["a", "b", "c"]).on_end(lambda: print("Finished"))
+stream = Stream(["a", "b", "c"]).on_end(lambda: print("Finished"))
 char = stream.next().get()
 if char == "a":
     stream.end()
