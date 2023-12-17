@@ -3,7 +3,7 @@ from typing import List, Iterable
 
 import pytest
 
-from tinystream import Stream, IterableStream
+from tinystream import Stream
 
 
 def fibonacci(*kwargs):
@@ -102,10 +102,15 @@ def test_dict_is_iterable():
 
 
 def test_list_one():
-    data = create_list()
-    stream = Stream.of(data)
-
+    stream = Stream(create_list())
     assert next(stream).name == "Parent A"
+
+
+def test_optional_index():
+    list = Stream(create_string_list())
+    assert list[0].present
+    assert list[4].absent
+    assert list[-1].absent
 
 
 def test_list_map():
@@ -176,7 +181,7 @@ def test_stream_dict():
         assert isinstance(item[1], Node)
 
 
-def assert_fibonacci(stream: IterableStream):
+def assert_fibonacci(stream: Stream):
     assert next(stream) == 1
     assert next(stream) == 2
     assert next(stream) == 3
@@ -228,7 +233,7 @@ def test_string_list_sum():
 
 
 def test_numeric_list_concat():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.concat(create_numeric_list()).sum().get() == 34
 
 
@@ -249,7 +254,7 @@ def test_empty():
 
 
 def test_doc():
-    stream = Stream.of([1, 2, 3, 4, 5])
+    stream = Stream([1, 2, 3, 4, 5])
 
     sum = stream \
         .map(lambda x: x + 1) \
@@ -264,20 +269,20 @@ def test_doc():
 
 
 def test_flatmap_list_of_list():
-    stream = Stream.of([create_numeric_list(), create_numeric_list(), create_numeric_list()])
+    stream = Stream([create_numeric_list(), create_numeric_list(), create_numeric_list()])
     flat = stream.flatmap()
     assert flat.count() == 15
 
 
 def test_flatmap_generator():
-    stream = Stream.of(create_numeric_list())\
+    stream = Stream(create_numeric_list())\
         .flatmap(fibonacci)
 
     assert_fibonacci(stream)
 
 
 def test_collect_joining():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.join(" -> ") == "1 -> 3 -> 5 -> 6 -> 2"
 
 
