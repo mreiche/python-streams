@@ -111,6 +111,7 @@ def test_optional_index():
     assert list[0].present
     assert list[4].absent
     assert list[-1].absent
+    assert list[0].map(str.upper).filter(lambda x: x == 'X').present
 
 
 def test_list_map():
