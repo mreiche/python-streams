@@ -79,7 +79,11 @@ def test_none_opt_filter():
 
 
 def test_none_opt_map():
-    assert Opt(None).map(len).get(0) == 0
+    assert Opt(None).map(len).absent
+
+
+def test_none_opt_map_key():
+    assert Opt(None).map_key("inexistent").absent
 
 
 def test_filter_type():
