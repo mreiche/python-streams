@@ -10,7 +10,7 @@ setup(
     description="Yet another python streams library",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="0.1.10",
+    version="0.1.11",
     url="https://github.com/mreiche/python-streams",
     author="Mike Reiche",
     py_modules=['tinystream'],

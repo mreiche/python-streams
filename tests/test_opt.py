@@ -74,8 +74,12 @@ def test_opt_value_filter_not_empty():
     assert Opt(1).filter(lambda x: x > 0).present
 
 
-def test_opt_empty_filter():
+def test_none_opt_filter():
     assert Opt(None).filter(lambda x: x is not None).absent
+
+
+def test_none_opt_map():
+    assert Opt(None).map(len).get(0) == 0
 
 
 def test_filter_type():
