@@ -85,6 +85,16 @@ def test_none_opt_map():
     assert opt.map(str.lower).absent
 
 
+def test_opt_value_len():
+    assert Opt("len").len == 3
+
+
+def test_none_opt_len():
+    opt = Opt(None)
+    assert opt.len == 0
+    assert opt.map(str.lower).len == 0
+
+
 def test_none_opt_map_key():
     assert Opt(None).map_key("inexistent").absent
 

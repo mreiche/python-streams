@@ -52,7 +52,7 @@ assert Opt(None).absent
 
 Map *optional*:
 ```python
-assert Opt("String").map(len).get() == 6
+assert Opt("String").len == 6
 ```
 
 Get default value:
