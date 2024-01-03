@@ -127,6 +127,13 @@ class Opt(Generic[T]):
     def stream(self):
         return Stream(self.__val)
 
+    @property
+    def len(self):
+        if self.absent:
+            return 0
+        else:
+            return len(self.__val)
+
 
 class EmptyOpt(Opt[None]):
     def __init__(self):
@@ -150,6 +157,10 @@ class EmptyOpt(Opt[None]):
 
     def stream(self):
         return Stream([])
+
+    @property
+    def len(self):
+        return 0
 
 
 class Stream(Iterator[T]):
