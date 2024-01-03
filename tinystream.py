@@ -82,13 +82,16 @@ class Opt(Generic[T]):
             return EmptyOpt()
 
     def map(self, mapper: Mapper[T, R]):
-        return Opt[R](mapper(self.__val))
+        if self.absent:
+            return EmptyOpt()
+        else:
+            return Opt[R](mapper(self.__val))
 
-    def if_empty(self, supplier: any|Supplier[R]):
+    def if_empty(self, supplier: Supplier[R] | any):
         warn("Please use if_absent() method instead", DeprecationWarning)
         return self.if_absent(supplier)
 
-    def if_absent(self, supplier: any|Supplier[R]):
+    def if_absent(self, supplier: Supplier[R] | any):
         if self.absent:
             if isinstance(supplier, Callable):
                 return Opt[R](supplier())
@@ -128,6 +131,9 @@ class Opt(Generic[T]):
 class EmptyOpt(Opt[None]):
     def __init__(self):
         super().__init__(None)
+
+    def map(self, mapper: Mapper[T, R]):
+        return self
 
     def filter(self, predicate: Predicate[T]):
         return self
