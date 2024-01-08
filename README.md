@@ -15,9 +15,9 @@ from tinystream import Stream
 stream = Stream([1, 2, 3, 4, 5])  # Stream.of_many(*), Stream.of_dict()
 
 stream \
-    .map(lambda x: x + 1) \       # flatmap(), peek(), map_key()
+    .map(lambda x: x + 1) \       # flatmap(), peek(), map_key(), map_kwargs(), map_keys()
     .filter(lambda x: x > 2) \    # filter_key(), filter_type()
-    .sorted(int, reverse=True) \  # sort()
+    .sorted(reverse=True) \       # sort()
     .reverse() \
     .limit(2) \
     .concat([4]) \
@@ -146,13 +146,23 @@ list = [
    {"node": Node(name="Node C")},
    {"node": Node(name="Node D")},
 ]
-Stream(list).map_keys("node", "name")
+names = Stream(list).map_keys("node", "name")
 ```
 
 ### Collected join
 
 ```python
 all_names = Stream([child]).map_key("name").join(", ")
+```
+
+### Map kwargs
+```python
+list = [
+   {"name": "Node A"},
+   {"name": "Node B"},
+]
+# Short cut for map(lambda x: Node(**x))
+nodes = Stream(list).map_kwargs(Node)
 ```
 
 ### Stream many

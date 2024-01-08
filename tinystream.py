@@ -218,6 +218,9 @@ class Stream(Iterator[T]):
     def map(self, mapper: Mapper[T, R]):
         return Stream[R](map(mapper, self))
 
+    def map_kwargs(self, mapper: Type[R]) -> "Stream[R]":
+        return self.map(lambda x: mapper(**x))
+
     def map_key(self, key: str | int):
         return self.filter_key(key).map(lambda x: _map_key(x, key))
 
@@ -264,7 +267,7 @@ class Stream(Iterator[T]):
         sort = sorted(self.__iterable, key=key, reverse=reverse)
         return Stream[T](sort)
 
-    def sorted(self, key, reverse: bool = False):
+    def sorted(self, key: any = None, reverse: bool = False):
         sort = sorted(self.__iterable, key=key, reverse=reverse)
         return Stream[T](sort)
 
