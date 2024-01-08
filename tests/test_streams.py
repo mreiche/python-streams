@@ -121,6 +121,12 @@ def test_list_map():
         assert name.startswith("Parent")
 
 
+def test_dict_map_kwargs():
+    data = [{"name": "First"}, {"name": "Second"}]
+    stream = Stream(data)
+    assert stream.map_kwargs(Node).next().get().name == "First"
+
+
 def test_list_map_type():
     parent_a, parent_b = create_parents()
     stream = Stream.of(parent_b.children)
@@ -260,13 +266,25 @@ def test_doc():
     sum = stream \
         .map(lambda x: x + 1) \
         .filter(lambda x: x > 2) \
-        .sorted(int, reverse=True) \
+        .sorted(reverse=True) \
         .reverse() \
         .limit(2) \
         .concat([4]) \
         .sum()
 
     assert sum.get() == 11
+
+
+def test_sorted_key():
+    stream = Stream((3, 5, 1))
+    assert stream.sorted(int).next().get() == 1
+    assert stream.sorted(int, True).next().get() == 5
+
+
+def test_sorted_no_key():
+    stream = Stream((3, 5, 1))
+    assert stream.sorted().next().get() == 1
+    assert stream.sorted(reverse=True).next().get() == 5
 
 
 def test_flatmap_list_of_list():
