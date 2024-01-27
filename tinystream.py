@@ -134,6 +134,9 @@ class Opt(Generic[T]):
         else:
             return len(self.__val)
 
+    def map_kwargs(self, mapper: Type[R]) -> "Opt[R]":
+        return self.map(lambda x: mapper(**x))
+
 
 class EmptyOpt(Opt[None]):
     def __init__(self):

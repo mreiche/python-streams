@@ -1,5 +1,6 @@
 import pytest
 
+from test_streams import Node
 from tinystream import Opt
 
 
@@ -149,3 +150,8 @@ def test_stream():
     opt = Opt(data)
     assert opt.map_key("list").stream().sum().get() == 6
     assert opt.map_key("inexistent").stream().sum().absent
+
+
+def test_dict_map_kwargs():
+    opt = Opt({"name": "First"})
+    assert opt.map_kwargs(Node).get().name == "First"
