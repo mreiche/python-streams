@@ -5,7 +5,7 @@
 
 This is a simple and lightweight Streams API inspired by Java Streams with support for type hinting.
 
-This package is release as `tinystream` at pypi.
+This package is released as `tinystream` at pypi.
 
 ## Basic API
 
@@ -186,7 +186,8 @@ A given data structure like:
 ```python
 data = {
    "ranges": [
-      timedelta(days=3),
+      {"days": 3},
+      {"weeks": 1},
    ]
 }
 ```
@@ -195,13 +196,13 @@ Without tinystream:
 ```python
 if "ranges" in data:
     range_data: timedelta
-    for range_data in filter(lambda x: isinstance(x, timedelta), data["ranges"]):
+    for range_data in map(lambda x: timedelta(**x), data["ranges"]):
         pass
 ```
 
 With tinystream:
 ```python
-for range_data in Opt(data).map_key("ranges").stream().filter_type(timedelta):
+for range_data in Opt(data).map_key("ranges").stream().map_kwargs(timedelta):
     pass
 ```
 
@@ -209,10 +210,11 @@ for range_data in Opt(data).map_key("ranges").stream().filter_type(timedelta):
 
 There are a couple of other implementation to fulfill similar requirements.
 
-- https://github.com/vxgmichel/aiostream (most professional)
-- https://github.com/alemazzo/Python-Java-Stream
-- https://github.com/ramsteak/streams
+- https://github.com/vxgmichel/aiostream
+- https://github.com/python-streamz/streamz
 - https://pypi.org/project/fluentpy
+- https://github.com/ramsteak/streams 
+- https://github.com/alemazzo/Python-Java-Stream  (*outdated*)
 - https://github.com/JaviOverflow/python-streams (*outdated*)
 - https://github.com/9seconds/streams/ (*outdated*)
 - https://github.com/tolsac/streampy (*outdated*)
