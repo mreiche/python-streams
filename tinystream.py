@@ -8,7 +8,7 @@ R = TypeVar("R")
 K = TypeVar("K")
 
 
-Mapper = Callable[[T], R]
+Mapper = Callable[[T], R] | Type[R]
 FlatMapper = Callable[[T], Iterable[R]]
 Consumer = Callable[[T], None]
 Comparator = Callable[[T, T], bool]
@@ -81,7 +81,7 @@ class Opt(Generic[T]):
         else:
             return EmptyOpt()
 
-    def map(self, mapper: Mapper[T, R]):
+    def map(self, mapper: Mapper[T, R]) -> "Opt[R]":
         if self.absent:
             return EmptyOpt()
         else:
