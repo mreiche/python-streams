@@ -68,7 +68,12 @@ def test_opt_value_map():
 
 
 def test_opt_value_map_type():
-    assert Opt(5).map(str).get() == "5"
+
+    class SimpleType:
+        def __init__(self, value: int):
+            self.value = value
+
+    assert Opt(5).map(SimpleType).get().value == 5
 
 
 def test_opt_value_filter_is_empty():
