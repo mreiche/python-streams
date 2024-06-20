@@ -128,6 +128,11 @@ stream = Stream(children)
 items_with_name = Stream([child]).filter_key("name")
 ```
 
+### Filter by key value
+```python
+items_with_name = Stream([child]).filter_key_value("name", "Child")
+```
+
 ### Filter by type
 ```python
 nodes_only = Stream([child]).filter_type(Node)

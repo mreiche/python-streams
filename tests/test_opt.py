@@ -117,12 +117,18 @@ def test_type():
     assert Opt("0").type(int).get() == "0"
 
 
-def test_filter_key_value():
+def test_filter_key_exists():
     assert Opt({"name": "Hallo"}).filter_key("name").present
 
 
-def test_filter_key_empty():
+def test_filter_key_inexistent():
     assert Opt({"name": "Hallo"}).filter_key("inexistent").absent
+
+
+def test_filter_key_value():
+    opt = Opt({"name": "Hallo"})
+    assert opt.filter_key_value("name", "Hallo").present
+    assert opt.filter_key_value("name", "Katze").absent
 
 
 def test_map_key_value():
