@@ -116,7 +116,7 @@ def test_optional_index():
 
 def test_list_map():
     data = create_list()
-    stream = Stream.of(data)
+    stream = Stream(data)
     for name in stream.map(map_name):
         assert name.startswith("Parent")
 
@@ -129,43 +129,43 @@ def test_dict_map_kwargs():
 
 def test_list_map_type():
     parent_a, parent_b = create_parents()
-    stream = Stream.of(parent_b.children)
+    stream = Stream(parent_b.children)
     assert stream.map(lambda x: x.parent).next().get().name == "Parent B"
 
 
 def test_string_one():
-    stream = Stream.of("Hallo Welt")
+    stream = Stream("Hallo Welt")
     assert stream.next().get() == "H"
 
 
 def test_string_one_ends():
-    stream = Stream.of("H")
+    stream = Stream("H")
     assert stream.next().get() == "H"
     assert stream.next().empty is True
 
 
 def test_list_flatmap_count():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.flatmap(lambda x: x.children).count() == 3
 
 
 def test_list_filter_count():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.filter(lambda x: x.name.endswith("A")).count() == 1
 
 
 def test_list_sort():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.sort(compare_name, reverse=True).next().get().name.endswith("B")
 
 
 def test_list_reverse():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.reverse().next().get().name.endswith("B")
 
 
 def test_list_peek():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
 
     def extend_name(x: Node):
         x.name += " Extended"
@@ -182,7 +182,7 @@ def test_stream_of_dict():
 
 
 def test_stream_dict():
-    stream = Stream.of(create_dict())
+    stream = Stream(create_dict())
     for item in stream:
         assert isinstance(item[0], str)
         assert isinstance(item[1], Node)
@@ -200,42 +200,42 @@ def assert_fibonacci(stream: Stream):
 
 
 def test_generator_one():
-    stream = Stream.of(fibonacci())
+    stream = Stream(fibonacci())
     assert_fibonacci(stream)
 
 
 def test_numeric_list_min():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.min().get() == 1
 
 
 def test_numeric_list_max():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.max().get() == 6
 
 
 def test_numeric_list_sum():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.sum().get() == 17
 
 
 def test_numeric_list_limit():
-    stream = Stream.of(create_numeric_list())
+    stream = Stream(create_numeric_list())
     assert stream.limit(2).sum().get() == 4
 
 
 def test_string_list_min():
-    stream = Stream.of(create_string_list())
+    stream = Stream(create_string_list())
     assert stream.min().get() == "A"
 
 
 def test_string_list_max():
-    stream = Stream.of(create_string_list())
+    stream = Stream(create_string_list())
     assert stream.max().get() == "Y"
 
 
 def test_string_list_sum():
-    stream = Stream.of(create_string_list())
+    stream = Stream(create_string_list())
     assert stream.map(str.lower).sum().get() == "xya"
 
 
@@ -253,11 +253,11 @@ def test_of_many_numeric_list():
     assert stream.sum().get() == 51
 
 
-def test_empty():
+def test_absent():
     empty = ()
-    assert Stream.of(empty).sum().empty is True
-    assert Stream.of(empty).max().empty is True
-    assert Stream.of(empty).min().empty is True
+    assert Stream(empty).sum().absent
+    assert Stream(empty).max().absent
+    assert Stream(empty).min().absent
 
 
 def test_doc():
@@ -306,45 +306,51 @@ def test_collect_joining():
 
 
 def test_object_list_filter_key():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.filter_key("name").count() == 2
 
 
 def test_object_list_filter_key_invert():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.filter_key("name", invert=True).count() == 0
 
 
 def test_object_list_map_key():
-    stream = Stream.of(create_list())
+    stream = Stream(create_list())
     assert stream.map_key("name").join(":") == "Parent A:Parent B"
 
 
 def test_object_dict_map_key():
-    stream = Stream.of(create_node_dict_list())
+    stream = Stream(create_node_dict_list())
     assert stream.map_keys("node", "name").filter(lambda name: name.endswith("C")).next().get() == "Node C"
     assert stream.map_keys("node", "inexistent").next().absent
 
 
 def test_find():
-    stream = Stream.of(create_string_list())
+    stream = Stream(create_string_list())
     find = stream.find(lambda s: s == "Y")
     assert find.present
     assert find.get() == "Y"
 
 
 def test_dict_list_filter_key():
-    stream = Stream.of(create_dict_list())
+    stream = Stream(create_dict_list())
     assert stream.filter_key("name").count() == 2
 
 
+def test_dict_list_filter_key_value():
+    stream = Stream(create_dict_list())
+    assert stream.filter_key_value("name", "Parent B").count() == 1
+    assert stream.filter_key_value("name", "Maus").count() == 0
+
+
 def test_dict_list_filter_key_invert():
-    stream = Stream.of(create_dict_list())
+    stream = Stream(create_dict_list())
     assert stream.filter_key("name", invert=True).count() == 0
 
 
 def test_dict_list_map_key():
-    stream = Stream.of(create_dict_list())
+    stream = Stream(create_dict_list())
     assert stream.map_key("name").join(":") == "Parent A:Parent B"
 
 
@@ -364,7 +370,7 @@ def test_dict_map_value():
 
 
 def test_mixed_list_filter_type():
-    stream = Stream.of(create_mixed_list())
+    stream = Stream(create_mixed_list())
     assert stream.filter_type(Node).count() == 1
 
 
@@ -375,7 +381,7 @@ def test_on_end():
         nonlocal closed
         closed = True
 
-    stream = Stream.of(["a", "b", "c"]).on_end(close)
+    stream = Stream(["a", "b", "c"]).on_end(close)
     for _ in stream:
         assert closed is False
 
@@ -391,7 +397,7 @@ def test_call_end():
 
     called = 0
 
-    stream = Stream.of(["a", "b", "c"]).on_end(close)
+    stream = Stream(["a", "b", "c"]).on_end(close)
     for _ in stream:
         called += 1
         assert closed is False
@@ -403,4 +409,4 @@ def test_call_end():
 
 def test_on_end_twice():
     with pytest.raises(AttributeError, match="on_end is immutable") as e:
-        Stream.of(["a", "b", "c"]).on_end(lambda: None).on_end(lambda: None)
+        Stream(["a", "b", "c"]).on_end(lambda: None).on_end(lambda: None)

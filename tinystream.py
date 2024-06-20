@@ -15,9 +15,10 @@ Comparator = Callable[[T, T], bool]
 Reducer = Callable[[T, T], R]
 Predicate = Callable[[T], bool]
 Supplier = Callable[[], T]
+Key = int|str
 
 
-def _filter_key(x: any, key: any, invert: bool = False):
+def _key_exists(x: any, key: Key, invert: bool = False):
     if isinstance(x, (list, tuple)):
         size = len(x)
         if invert:
@@ -36,7 +37,7 @@ def _filter_key(x: any, key: any, invert: bool = False):
             return hasattr(x, key)
 
 
-def _map_key(x: any, key: any):
+def _get_key_value(x: any, key: Key) -> any:
     if isinstance(x, (list, dict, tuple)):
         return x[key]
     else:
@@ -106,15 +107,21 @@ class Opt(Generic[T]):
     def filter_type(self, typehint: Type[R]) -> "Opt[R]":
         return self.filter(lambda x: isinstance(x, typehint))
 
-    def filter_key(self, key: str | int, invert: bool = False):
-        if _filter_key(self.__val, key, invert):
+    def filter_key(self, key: Key, invert: bool = False):
+        if _key_exists(self.__val, key, invert):
             return self
         else:
             return EmptyOpt()
 
-    def map_key(self, key: str | int):
-        if _filter_key(self.__val, key):
-            return Opt(_map_key(self.__val, key))
+    def filter_key_value(self, key: Key, value: any):
+        if _key_exists(self.__val, key, False) and _get_key_value(self.__val, key) == value:
+            return self
+        else:
+            return EmptyOpt()
+
+    def map_key(self, key: Key):
+        if _key_exists(self.__val, key):
+            return Opt(_get_key_value(self.__val, key))
         else:
             return EmptyOpt()
 
@@ -148,10 +155,13 @@ class EmptyOpt(Opt[None]):
     def filter(self, predicate: Predicate[T]):
         return self
 
-    def map_key(self, key: str | int):
+    def map_key(self, key: Key):
         return self
 
-    def filter_key(self, key: str | int, invert: bool = False):
+    def filter_key(self, key: Key, invert: bool = False):
+        return self
+
+    def filter_key_value(self, key: Key, value: any):
         return self
 
     @property
@@ -224,8 +234,8 @@ class Stream(Iterator[T]):
     def map_kwargs(self, mapper: Type[R]) -> "Stream[R]":
         return self.map(lambda x: mapper(**x))
 
-    def map_key(self, key: str | int):
-        return self.filter_key(key).map(lambda x: _map_key(x, key))
+    def map_key(self, key: Key):
+        return self.filter_key(key).map(lambda x: _get_key_value(x, key))
 
     def map_keys(self, *iterables):
         inst = self
@@ -242,8 +252,11 @@ class Stream(Iterator[T]):
     def filter(self, predicate: Predicate[T]):
         return Stream[T](filter(predicate, self.__iterable))
 
-    def filter_key(self, key: str | int, invert: bool = False):
-        return self.filter(lambda x: _filter_key(x, key, invert))
+    def filter_key(self, key: Key, invert: bool = False):
+        return self.filter(lambda x: _key_exists(x, key, invert))
+
+    def filter_key_value(self, key: Key, value: any):
+        return self.filter(lambda x: _key_exists(x, key, False) and _get_key_value(x, key) == value)
 
     def flatmap(self, mapper: FlatMapper[T, R] = None):
 
