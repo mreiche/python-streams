@@ -30,50 +30,15 @@ Aggregators like `sum()`, `count()`, `max()` will `collect()` the data and end t
 
 ## Built-in Optional support
 
-Some aggregators like `sum()`, `max()` are *optional*:
+Some aggregators like `sum()`, `max()` are `Opt`:
 
 ```python
-assert Stream((1, 2, 3, 4, 5)).sum().present
+assert Stream((1, 2, 3, 4, 5)).sum().get() == 15
 ```
 
-Get next value as *optional*:
+## More features
 
-```python
-assert Stream((1, 2, 3, 4, 5)).next().present
-```
-
-Create custom *optional*:
-
-```python
-from tinystream import Opt
-
-assert Opt(None).absent
-```
-
-Map *optional*:
-```python
-assert Opt("String").map(str.lower).len == 6
-```
-
-Get default value:
-```python
-assert Opt(None).get(6) == 6
-assert Opt(None).get(lambda: 6) == 6
-assert Opt(None).if_absent(lambda: 3).present
-```
-
-Filter value:
-
-```python
-assert Opt(0).filter(lambda x: x > 0).absent
-```
-
-You can also access optional index elements of the stream, but this will `collect()` and end the stream.
-```python
-assert Stream([])[2].absent
-```
-
-## Type hinting
+### Type hinting
 
 You can typehint datatypes like:
 
@@ -103,8 +68,6 @@ def map_parent(n: Node):
 
 assert stream.map(map_parent).next().get().name == "B"
 ```
-
-## More features
 
 ### Typed dictionaries
 
@@ -185,9 +148,40 @@ if char == "a":
     stream.end()
 ```
 
+### Opt usage
+
+Get next value as `Opt`:
+
+```python
+assert Stream((1, 2, 3, 4, 5)).next().present
+```
+
+Mapping:
+```python
+assert Opt("String").map(str.lower).len == 6
+```
+
+Get default value:
+```python
+assert Opt(None).get(6) == 6
+assert Opt(None).get(lambda: 6) == 6
+assert Opt(None).if_absent(lambda: 3).present
+```
+
+Filter value:
+```python
+assert Opt(0).filter(lambda x: x > 0).absent
+```
+
+You can also access optional index elements of the stream, but this will `collect()` and end the stream.
+```python
+assert Stream([])[2].absent
+```
+
 ## Examples
 
-A given data structure like:
+### Write better code with `Stream`
+
 ```python
 data = {
    "ranges": [
@@ -195,21 +189,27 @@ data = {
       {"weeks": 1},
    ]
 }
-```
 
-Without tinystream:
-```python
-if "ranges" in data:
-    range_data: timedelta
-    for range_data in map(lambda x: timedelta(**x), data["ranges"]):
-        pass
-```
-
-With tinystream:
-```python
+# With tinystream Stream
 for range_data in Opt(data).map_key("ranges").stream().map_kwargs(timedelta):
-    pass
+   pass
+
+# Vanilly Python
+if "ranges" in data:
+   range_data: timedelta
+   for range_data in map(lambda x: timedelta(**x), data["ranges"]):
+      pass
 ```
+
+### Write better code with `Opt`
+```python
+# tinystream Opt
+var = Opt(my_dict).kmap("key").filter(not_empty).get("default")
+
+# Vanilla Python
+var = my_dict["key"] if "key" in my_dict and not_empty(my_dict["key"]) else "default"
+```
+
 
 ## Comparison with other libraries
 

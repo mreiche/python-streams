@@ -125,6 +125,10 @@ class Opt(Generic[T]):
         else:
             return EmptyOpt()
 
+    def kmap(self, key: Key):
+        """This is an alias for map_key"""
+        return self.map_key(key)
+
     def map_keys(self, *iterables):
         inst = self
         for key in iterables:
@@ -236,6 +240,10 @@ class Stream(Iterator[T]):
 
     def map_key(self, key: Key):
         return self.filter_key(key).map(lambda x: _get_key_value(x, key))
+
+    def kmap(self, key: Key):
+        """This is an alias for map_key"""
+        return self.map_key(key)
 
     def map_keys(self, *iterables):
         inst = self
