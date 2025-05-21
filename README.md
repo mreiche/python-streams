@@ -231,17 +231,6 @@ There are a couple of other implementation to fulfill similar requirements.
 PYTHONPATH="." pytest --cov=tinystream -n 4 tests/
 ```
 
-### Release update
-1. Update version in `setup.py`
-2. Package library
-    ```shell
-    python setup.py sdist
-    ```
-3. Publish library
-    ```shell
-    twine upload dist/tinystream-[version].tar.gz
-    ```
-
 ## References
 
 - https://github.com/MichaelKim0407/tutorial-pip-package
