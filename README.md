@@ -1,5 +1,6 @@
 ![Tests Status](https://github.com/mreiche/python-streams/actions/workflows/tests.yml/badge.svg)
 [![Code Coverage Status](https://codecov.io/github/mreiche/python-streams/branch/main/graph/badge.svg)](https://app.codecov.io/github/mreiche/python-streams)
+[![PyPI version](https://badge.fury.io/py/tinystream.svg)](https://badge.fury.io/py/tinystream)
 
 # tinystream / python-streams
 
