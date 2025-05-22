@@ -33,7 +33,7 @@ jobs:
       env:
         PYTHONPATH: "."
       run: |
-        pytest --junitxml=./test-results/tests.xml --cov=./tinystream -n 4 ./tests/
+        pytest --junitxml=./test-results/tests.xml --cov=./tinystream.py -n 4 ./tests/
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
