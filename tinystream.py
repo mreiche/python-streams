@@ -1,7 +1,6 @@
 import functools
 import itertools
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
-from warnings import warn
 
 T = TypeVar("T")
 R = TypeVar("R")
@@ -49,11 +48,6 @@ class Opt(Generic[T]):
         self.__val = value
 
     @property
-    def empty(self):
-        warn("Please use absent property instead", DeprecationWarning)
-        return self.absent
-
-    @property
     def absent(self):
         return self.__val is None
 
@@ -87,10 +81,6 @@ class Opt(Generic[T]):
             return EmptyOpt()
         else:
             return Opt[R](mapper(self.__val))
-
-    def if_empty(self, supplier: Supplier[R] | any):
-        warn("Please use if_absent() method instead", DeprecationWarning)
-        return self.if_absent(supplier)
 
     def if_absent(self, supplier: Supplier[R] | any):
         if self.absent:
@@ -186,11 +176,6 @@ class Stream(Iterator[T]):
         self.__iterable = self.__normalize_iterator(iterable)
         self.__collected: List[T] = None
         self.__on_end: Callable = None
-
-    @staticmethod
-    def of(iterable: Iterable[T]):
-        warn("Use constructor", DeprecationWarning)
-        return Stream[T](iterable)
 
     @staticmethod
     def of_dict(source_dict: Dict[K, T]):
