@@ -317,7 +317,7 @@ def test_object_list_filter_key_invert():
 
 def test_object_list_map_key():
     stream = Stream(create_list())
-    assert stream.map_key("name").join(":") == "Parent A:Parent B"
+    assert stream.kmap("name").join(":") == "Parent A:Parent B"
 
 
 def test_object_dict_map_key():

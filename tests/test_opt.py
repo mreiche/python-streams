@@ -1,11 +1,10 @@
 import pytest
 
 from test_streams import Node
-from tinystream import Opt
+from tinystream import Opt, EmptyOpt
 
 
 def test_opt_absent():
-    assert Opt(None).empty
     assert Opt(None).absent
 
 
@@ -60,7 +59,6 @@ def test_opt_empty_if_empty_callable():
 
 def test_opt_empty_if_empty_value():
     assert Opt(None).if_absent("Empty").get() == "Empty"
-    assert Opt(None).if_empty("Empty").get() == "Empty"
 
 
 def test_opt_value_map():
@@ -106,7 +104,7 @@ def test_none_opt_len():
 
 
 def test_none_opt_map_key():
-    assert Opt(None).map_key("inexistent").absent
+    assert Opt(None).kmap("inexistent").absent
 
 
 def test_filter_type():
@@ -129,6 +127,7 @@ def test_filter_key_value():
     opt = Opt({"name": "Hallo"})
     assert opt.filter_key_value("name", "Hallo").present
     assert opt.filter_key_value("name", "Katze").absent
+    assert opt.map_key("inexistent").filter_key_value("name", "value").absent
 
 
 def test_map_key_value():
