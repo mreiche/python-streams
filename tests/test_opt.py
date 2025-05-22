@@ -1,7 +1,7 @@
 import pytest
 
 from test_streams import Node
-from tinystream import Opt, EmptyOpt
+from tinystream import Opt
 
 
 def test_opt_absent():

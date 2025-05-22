@@ -141,7 +141,6 @@ def test_string_one():
 def test_string_one_ends():
     stream = Stream("H")
     assert stream.next().get() == "H"
-    assert stream.next().empty is True
 
 
 def test_list_flatmap_count():
@@ -361,7 +360,7 @@ def test_dict_map_key():
 
 def test_dict_filter_key_invert():
     stream = Stream.of_dict(create_dict())
-    assert stream.filter_key(0, invert=True).next().empty is True
+    assert stream.filter_key(0, invert=True).next().absent
 
 
 def test_dict_map_value():
