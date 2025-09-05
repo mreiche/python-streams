@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pytest
 
 from test_streams import Node
@@ -169,3 +171,11 @@ def test_stream():
 def test_dict_map_kwargs():
     opt = Opt({"name": "First"})
     assert opt.map_kwargs(Node).get().name == "First"
+
+
+def test_map_enum():
+    class AnalysisAnalysisState(str, Enum):
+        NOT_SET = "NOT_SET"
+        RESOLVED = "RESOLVED"
+
+    assert Opt(AnalysisAnalysisState.RESOLVED).map_key("value").get() == "RESOLVED"

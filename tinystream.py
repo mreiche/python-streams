@@ -1,3 +1,4 @@
+import enum
 import functools
 import itertools
 from typing import Iterable, TypeVar, Callable, List, Dict, Tuple, Iterator, Generic, Type
@@ -18,22 +19,27 @@ Key = int|str
 
 
 def _key_exists(x: any, key: Key, invert: bool = False):
+    def _hasattr():
+        if invert:
+            return not hasattr(x, key)
+        else:
+            return hasattr(x, key)
+
     if isinstance(x, (list, tuple)):
         size = len(x)
         if invert:
             return key >= size
         else:
             return key < size
+    elif isinstance(x, enum.Enum):
+        return _hasattr()
     elif isinstance(x, (dict, Iterable)):
         if invert:
             return key not in x
         else:
             return key in x
     else:
-        if invert:
-            return not hasattr(x, key)
-        else:
-            return hasattr(x, key)
+        return _hasattr()
 
 
 def _get_key_value(x: any, key: Key) -> any:
